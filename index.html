@@ -1,0 +1,2875 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Anton&family=Inter:opsz@14..32&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <link rel="icon" type="image/png" href="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/DENR-Biodiversity_Management_Bureau.svg/1920px-DENR-Biodiversity_Management_Bureau.svg.png">
+    <title>BioInvasive - Panamá</title>
+    <!-- Leaflet.js para mapas interactivos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+    <style>
+        .leaflet-map-wrapper {
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid rgba(35, 194, 128, 0.3);
+            box-shadow: 0 0 20px rgba(35, 194, 128, 0.15);
+        }
+        .leaflet-map-wrapper .leaflet-container {
+            background: #0d1117;
+        }
+        .map-legend-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        .map-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255,255,255,0.07);
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 0.82rem;
+            color: #ccc;
+        }
+        .map-legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .map-info-bar {
+            display: flex;
+            gap: 16px;
+            margin-top: 10px;
+            padding: 10px 14px;
+            background: rgba(35,194,128,0.08);
+            border-radius: 8px;
+            border-left: 3px solid #23C280;
+            font-size: 0.85rem;
+            color: #aaa;
+            flex-wrap: wrap;
+        }
+        .map-info-bar span { color: #23C280; font-weight: 600; }
+        /* Leaflet popup style override */
+        .leaflet-popup-content-wrapper {
+            background: #1a2a1a !important;
+            color: #eee !important;
+            border: 1px solid rgba(35,194,128,0.4) !important;
+            border-radius: 10px !important;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5) !important;
+        }
+        .leaflet-popup-tip { background: #1a2a1a !important; }
+        .leaflet-popup-content { margin: 14px 18px; }
+        .popup-title { font-weight: 700; color: #23C280; font-size: 0.95rem; margin-bottom: 4px; }
+        .popup-body { font-size: 0.82rem; color: #bbb; line-height: 1.5; }
+        .popup-tag {
+            display: inline-block;
+            background: rgba(35,194,128,0.15);
+            color: #23C280;
+            border-radius: 4px;
+            padding: 2px 7px;
+            font-size: 0.75rem;
+            margin-top: 5px;
+        }
+        .leaflet-control-zoom a {
+            background: #1a2a1a !important;
+            color: #23C280 !important;
+            border-color: rgba(35,194,128,0.3) !important;
+        }
+        .leaflet-control-zoom a:hover { background: #23C280 !important; color: #000 !important; }
+        .leaflet-control-attribution { background: rgba(0,0,0,0.5) !important; color: #555 !important; }
+        .leaflet-control-attribution a { color: #555 !important; }
+    </style>
+</head>
+<body>
+    <header>
+      <nav class="navbar">
+        <div class="left-section">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/DENR-Biodiversity_Management_Bureau.svg/1920px-DENR-Biodiversity_Management_Bureau.svg.png" alt="Logo" class="nav-logo">
+            <p class="logo">Bio<span>Invasive</span></p>
+        </div>
+        <div class="mid-section">
+          <ul>
+              <li id="nav-inicio">Inicio</li>
+              <li id="nav-definicion">Definición</li>
+              <!-- Dropdown de Especies -->
+              <li class="dropdown" id="nav-especies-dropdown">
+                  <a href="javascript:void(0)" class="dropbtn" id="nav-especies">Especies <i class="fas fa-chevron-down"></i></a>
+                  <div class="dropdown-content">
+                      <a href="#" id="nav-especies-animales">Animales</a>
+                      <a href="#" id="nav-especies-plantas">Plantas</a>
+                  </div>
+              </li>
+              <li id="nav-llegada">Llegada</li>
+              <li id="nav-impacto">Impacto</li>
+              <li id="nav-prevencion">Prevención</li>
+          </ul>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      <!-- Pantalla de Inicio -->
+      <div id="pantalla-inicio" class="pantalla-activa">
+        <!-- Hero a pantalla completa -->
+        <section class="inicio-hero" style="background-image: url('https://www.visitcentroamerica.com/wp-content/uploads/2025/04/Darien-National-Park-Panama-Centroamerica-02.webp');"> <!-- Parque Natural de Darién -->
+        <div class="inicio-hero-overlay"></div>
+        <div class="inicio-hero-content">
+          <h1 class="inicio-hero-title">
+            <span class="inicio-hero-title-line">Bio</span><span class="inicio-hero-title-line inicio-hero-title-line--green">Invasive</span>
+          </h1>
+          <p class="inicio-hero-subtitle">Panamá · Biodiversidad bajo amenaza</p>
+          <p class="inicio-hero-quote">“Detrás de cada especie invasora, hay un ecosistema que sufre.”</p>
+        </div>
+        <div class="inicio-scroll-indicator">
+          <span></span>
+        </div>
+      </section>
+
+        <!-- Sección "Equilibrio" mejorada -->
+        <section class="inicio-mensaje">
+          <div class="inicio-mensaje-contenido">
+            <h2 class="inicio-mensaje-titulo">El equilibrio se rompe</h2>
+            <p class="inicio-mensaje-texto">
+              En cada rincón de Panamá, la vida teje una red perfecta. Pero hay hilos que no pertenecen,
+              especies que llegan silenciosamente y amenazan con deshacerlo todo.
+            </p>
+            <!-- Tarjeta de estadística destacada -->
+            <div class="inicio-estadistica">
+              <span class="inicio-estadistica-numero">40%</span>
+              <span class="inicio-estadistica-desc">de especies nativas están en riesgo por especies invasoras</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Imagen destacada + texto -->
+        <section class="inicio-visual">
+          <div class="inicio-visual-grid">
+            <div class="inicio-visual-imagen">
+              <img src="https://www.emprendedorestrella.com/content/20200831210029-1.jpg" alt="Ecosistemas panameños">
+            </div>
+            <div class="inicio-visual-texto">
+              <h3>Lo que está en juego</h3>
+              <p>
+                El pez león devora los arrecifes, el jacinto de agua asfixia los lagos, la rana toro silencia los humedales.
+                Detrás de cada número hay un pedazo de Panamá que se desvanece.
+              </p>
+              <p class="inicio-visual-firma">— Conocimiento es protección</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Galería con tus imágenes (tal como las pediste) -->
+        <section class="inicio-galeria">
+          <div class="inicio-galeria-item">
+            <img src="https://confidencial.digital/wp-content/uploads/2023/09/Caracol-gigante-africano.jpg" alt="Caracol Invsasor - BBC">
+          </div>
+          <div class="inicio-galeria-item">
+            <img src="https://www.panamaamerica.com.pa/sites/default/files/fileEDqzrd" alt="Aves Invasoras">
+          </div>
+          <div class="inicio-galeria-item">
+            <img src="https://www.lavanguardia.com/files/og_thumbnail/uploads/2019/10/14/5fa52c7e4ab3f.jpeg" alt="Pez cabeza de serpiente">
+          </div>
+        </section>
+
+        <!-- Sección "Explora, aprende, actúa" (tres tarjetas con íconos personalizables) -->
+      <section class="inicio-acciones">
+        <div class="inicio-acciones-grid">
+          <!-- Tarjeta Explorar -->
+          <div class="inicio-accion-card" onclick="window.mostrarPantalla('definicion')">
+            <div class="inicio-accion-icono">
+              <img src="https://static.divxland.org/wp-content/uploads/2025/07/picturethis-plant-identifier-thumbnail.png" alt="Icon-actuar">
+            </div>
+            <h3>Explorar</h3>
+            <p>Conoce qué son las especies invasoras y por qué son una amenaza.</p>
+          </div>
+          <!-- Tarjeta Aprender -->
+          <div class="inicio-accion-card" onclick="window.mostrarPantalla('impacto')">
+            <div class="inicio-accion-icono">
+            <img src="https://images.vexels.com/media/users/3/127903/isolated/lists/c6916ceee241dfb71115213d2a74624e-green-square-tree-icon.png" alt="Icon-actuar">
+            </div>
+            <h3>Aprender</h3>
+            <p>Descubre el impacto real en nuestros ecosistemas y economía.</p>
+          </div>
+          <!-- Tarjeta Actuar -->
+          <div class="inicio-accion-card" onclick="window.mostrarPantalla('prevencion')">
+            <div class="inicio-accion-icono">
+              <img src="https://biosferaviajes.com/wp-content/uploads/2025/07/aves2.png" alt="Icon-actuar">
+            </div>
+            <h3>Actuar</h3>
+            <p>Infórmate sobre cómo prevenir y controlar la propagación.</p>
+          </div>
+        </div>
+      </section>
+      </div>
+
+          <!-- ===== DENTRO DE PANTALLA-CONCEPTO (DEFINICIÓN) ===== -->
+      <div id="pantalla-definicion" class="pantalla-oculta">
+          <div class="container-inicio">
+              <!-- Título principal -->
+              <div class="section-header" style="margin-top: 40px;">
+                  <h2>¿Qué son las especies invasoras?</h2>
+                  <p>En Panamá, especies como el pez león y diversas hierbas invasoras afectan gravemente los ecosistemas locales.</p>
+              </div>
+
+              <!-- Texto de introducción -->
+              <div class="enterprise-card" style="margin-bottom: 30px; padding: 30px;">
+                  <p style="color: white; font-size: 1.1rem; line-height: 1.8;">Las especies invasoras son organismos (animales, plantas, hongos o microorganismos) que son introducidos, de manera intencional o accidental, en un ecosistema distinto al de su origen natural y que logran establecerse, reproducirse y expandirse, causando impactos negativos en el medio ambiente, la economía o la salud humana.</p>
+              </div>
+
+              <!-- Tarjetas con imágenes (Pez León, Caracol, Jacinto) -->
+              <div class="invasive-topic-grid" style="margin-top: 20px;">
+                  <!-- Pez León -->
+                  <div class="enterprise-card" style="padding: 0; overflow: hidden;">
+                      <img src="https://www.nationalgeographic.com.es/medio/2023/03/09/sus-vivos-colores-sirven-de-advertencia-a-posibles-depredadores_def6fea6_%20Sus%20vivos%20colores%20sirven%20de%20advertencia%20a%20posibles%20depredadores_230309174404_2000x1333.jpg" alt="Pez León" style="width: 100%; height: 200px; object-fit: cover;">
+                      <div style="padding: 20px;">
+                          <h3 style="color: #23C280;">Pez León</h3>
+                          <p style="color: white;">Originario del Indo-Pacífico, llegó a través de acuarios y se reprodujo sin control, depredando especies nativas y afectando arrecifes.</p>
+                      </div>
+                  </div>
+                  <!-- Caracol Africano -->
+                  <div class="enterprise-card" style="padding: 0; overflow: hidden;">
+                      <img src="https://farallonesdelcitara.bioexploradores.com/wp-content/uploads/2022/12/IMG_4109-2-1200x900.jpg" alt="Caracol gigante africano" style="width: 100%; height: 200px; object-fit: cover;">
+                      <div style="padding: 20px;">
+                          <h3 style="color: #23C280;">Caracol gigante africano</h3>
+                          <p style="color: white;">Introducido como mascota o para consumo, afecta cultivos y puede transmitir enfermedades. Es una plaga difícil de erradicar.</p>
+                      </div>
+                  </div>
+                  <!-- Jacinto de Agua -->
+                  <div class="enterprise-card" style="padding: 0; overflow: hidden;">
+                      <img src="https://todoviveros.com/wp-content/uploads/2021/03/Jacintos-de-Agua-3.jpg" alt="Jacinto de agua" style="width: 100%; height: 200px; object-fit: cover;">
+                      <div style="padding: 20px;">
+                          <h3 style="color: #23C280;">Jacinto de agua</h3>
+                          <p style="color: white;">Planta acuática ornamental que se reproduce rápidamente, bloqueando la luz y reduciendo el oxígeno en ríos y lagos.</p>
+                      </div>
+                  </div>
+              </div>
+
+              <!-- Sección "Especie exótica" y botón modal -->
+              <div class="enterprise-section" style="margin-top: 50px;">
+                  <div class="section-header">
+                      <h2>Especie exótica</h2>
+                      <p>Una especie exótica es aquella que se encuentra fuera de su área de distribución natural debido a la intervención humana, ya sea de forma intencional o accidental. No todas las especies exóticas causan daño.</p>
+                  </div>
+                  <div style="text-align: center;">
+                      <button id="botonAbrir" class="btn-hero" style="display: inline-block; padding: 15px 40px;">Diferencias entre especies nativas y no nativas</button>
+                  </div>
+              </div>
+          </div>
+      </div>
+
+
+
+      <!-- Pantalla de Especies - Animales -->
+      <div id="pantalla-especies-animales" class="pantalla-oculta">
+          <div class="container-inicio">
+              <div class="section-header mt-40">
+                  <h2>Especies Invasoras: Animales</h2>
+                  <p>Conoce los animales introducidos que afectan la fauna y los ecosistemas panameños.</p>
+              </div>
+              <div class="invasive-topic-grid">
+                  <!-- Pez León -->
+                  <div class="enterprise-card image-card">
+                      <img src="https://cdn0.ecologiaverde.com/es/posts/3/8/3/pez_leon_caracteristicas_e_informacion_de_esta_especie_invasora_4383_orig.jpg" alt="Pez León">
+                      <div class="card-content">
+                          <h3>Pez León</h3>
+                          <p>Pez de colores llamativos con rayas rojas, marrones y blancas. Posee 18 espinas venenosas que inyectan una sustancia neurotóxica.</p>
+                          <button class="btn-primary card-button">Ver más →</button>
+                      </div>
+                  </div>
+                  <!-- Pez Sargento  -->
+                  <div class="enterprise-card image-card">
+                      <img src="https://www.laestrella.com.pa/binrepository/1200x900/0c50/1200d800/none/199516884/NNES/img-1610-sargento-cichla-monoculus_181-10113609_20250506162010.jpg" alt="Pez Sargento">
+                      <div class="card-content">
+                          <h3>Pez Sargento</h3>
+                          <p> Cíclido con tres manchas oscuras (ocelos) en los costados y una en la base de la cola.</p>
+                          <button class="btn-primary card-button">Ver más →</button>
+                      </div>
+                  </div>
+                  <!-- Tilapia -->
+                  <div class="enterprise-card image-card">
+                      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTU7HQuU9-X-RqI8xx7qr_TG4jAgaMZSavDeA&s" alt="Tilapia">
+                      <div class="card-content">
+                          <h3>Tilapia</h3>
+                          <p>Peces de cuerpo comprimido lateralmente, color gris o rojizo, muy resistentes a condiciones ambientales variables.</p>
+                          <button class="btn-primary card-button">Ver más →</button>
+                      </div>
+                  </div>
+                  <!-- Caracol Gigante Africano -->
+                  <div class="enterprise-card image-card">
+                      <img src="https://farallonesdelcitara.bioexploradores.com/wp-content/uploads/2022/12/IMG_4109-2-1200x900.jpg" alt="Caracol Gigante Africano">
+                      <div class="card-content">
+                          <h3>Caracol Gigante Africano</h3>
+                          <p>Una de las plagas más dañinas. Devora cultivos, transmite parásitos y se reproduce a gran velocidad en entornos urbanos y rurales.</p>
+                          <button class="btn-primary card-button">Ver más →</button>
+                      </div>
+                  </div>
+                  <!-- Hormiga Loca -->
+                  <div class="enterprise-card image-card">
+                      <img src="https://upload.wikimedia.org/wikipedia/commons/7/7e/Paratrechina_vividula_casent0059600_profile_1.jpg" alt="Hormiga Loca">
+                      <div class="card-content">
+                          <h3>Hormiga Loca</h3>
+                          <p>IHormiga muy pequeña de color café rojizo ($2.4$ a $2.7$ mm) con patas y antenas muy largas</p>
+                          <button class="btn-primary card-button">Ver más →</button>
+                      </div>
+                  </div>
+                  <!-- Gecko Casero Común -->
+                  <div class="enterprise-card image-card">
+                      <img src="https://www.ecoregistros.org/site/images/dataimages/2025/06/06/637332/Besucona-Asiatica--Hemidactylus-frenatus-.jpg" alt="Gecko Casero Común">
+                      <div class="card-content">
+                          <h3>Gecko Casero Común</h3>
+                          <p>Pequeña lagartija de 13 a 15 cm con piel delicada y pupilas elípticas verticales.</p>
+                          <button class="btn-primary card-button">Ver más →</button>
+                      </div>
+                  </div>
+                  <!-- Rana Coquí Antillana-->
+                  <div class="enterprise-card image-card">
+                      <img src="https://animaldiversity.org/collections/contributors/james_harding/Eleuth.plan/medium.jpg" alt="Rana Coquí Antillana">
+                      <div class="card-content">
+                          <h3>Rana Coquí Antillana</h3>
+                          <p>Rana diminuta de color café, reconocida por su peculiar canto.</p>
+                          <button class="btn-primary card-button">Ver más →</button>
+                      </div>
+                  </div>
+              </div>
+              <!-- <div class="flex-center mt-40">
+                  <button class="btn-primary btn-large">Reportar avistamiento de animal →</button>
+              </div> -->
+          </div>
+      </div>
+
+      <!-- Pantalla de Especies - Plantas -->
+      <div id="pantalla-especies-plantas" class="pantalla-oculta">
+          <div class="container-inicio">
+              <div class="section-header mt-40">
+                  <h2>Especies Invasoras: Plantas</h2>
+                  <p>La flora invasora que está transformando los paisajes y ecosistemas de Panamá.</p>
+              </div>
+              <div class="invasive-topic-grid">
+                  <!-- Paja Canalera-->
+                  <div class="enterprise-card image-card">
+                      <img src="https://www.jircas.go.jp/sites/default/files/thaivege/087B_4.jpg" alt="Paja Canalera">
+                      <div class="card-content">
+                          <h3>Paja Canalera</h3>
+                          <p>Hierba gramínea que alcanza hasta 5 metros de altura con abundante floración blanca.</p>
+                          <button class="btn-primary card-button">Ver más →</button>
+                      </div>
+                  </div>
+                  <!-- Jacinto de Agua -->
+                  <div class="enterprise-card image-card">
+                      <img src="https://todoviveros.com/wp-content/uploads/2021/03/Jacintos-de-Agua-3.jpg" alt="Jacinto de Agua">
+                      <div class="card-content">
+                          <h3>Jacinto de Agua</h3>
+                          <p>Forma mantos densos en ríos y lagos (como el Lago Alajuela), bloqueando la luz solar, reduciendo el oxígeno y dificultando la navegación.</p>
+                          <button class="btn-primary card-button">Ver más →</button>
+                      </div>
+                  </div>
+                  <!-- Tulipán Africano  -->
+                  <div class="enterprise-card image-card">
+                      <img src="https://www.arbolesornamentales.es/Spathodeacampa.jpg" alt="Plantaciones de Pino">
+                      <div class="card-content">
+                          <h3>Tulipán Africano </h3>
+                          <p>Árbol de hasta 20 metros con flores grandes de color rojo-naranja intenso en forma de copa.</p>
+                          <button class="btn-primary card-button">Ver más →</button>
+                      </div>
+                  </div>
+              </div>
+              <!-- <div class="flex-center mt-40">
+                  <button class="btn-primary btn-large">Guía de identificación de plantas →</button>
+              </div> -->
+          </div>
+      </div>
+
+      <!-- ===== DENTRO DE PANTALLA-LLEGADA (¿CÓMO LLEGAN?) ===== -->
+      <style>
+        /* ── Tabs de navegación ── */
+        .llegada-tabs {
+          display: flex;
+          gap: 8px;
+          flex-wrap: wrap;
+          margin: 0 0 28px;
+        }
+        .llegada-tab {
+          background: rgba(255,255,255,0.06);
+          border: 1px solid rgba(255,255,255,0.12);
+          color: #aaa;
+          padding: 10px 20px;
+          border-radius: 30px;
+          cursor: pointer;
+          font-size: 0.85rem;
+          font-weight: 600;
+          transition: all .25s ease;
+          white-space: nowrap;
+        }
+        .llegada-tab:hover { background: rgba(35,194,128,0.15); color: #fff; }
+        .llegada-tab.active {
+          background: #23C280;
+          color: #fff;
+          border-color: #23C280;
+          box-shadow: 0 0 18px rgba(35,194,128,0.35);
+        }
+
+        /* ── Paneles ── */
+        .llegada-panel { display: none; animation: fadeUp .35s ease; }
+        .llegada-panel.active { display: block; }
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(14px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── Hero visual con video ── */
+        .llegada-hero {
+          position: relative;
+          border-radius: 16px;
+          overflow: hidden;
+          margin-bottom: 24px;
+          aspect-ratio: 16/7;
+          background: #0d1a13;
+        }
+        .llegada-hero iframe {
+          width: 100%; height: 100%;
+          border: none;
+          pointer-events: none; /* solo decorativo mientras no se haga clic */
+        }
+        .llegada-hero-overlay {
+          position: absolute; inset: 0;
+          background: linear-gradient(to top, rgba(0,0,0,.75) 0%, transparent 55%);
+          display: flex; align-items: flex-end;
+          padding: 20px 24px;
+          pointer-events: none;
+        }
+        .llegada-hero-overlay h3 {
+          color: #fff; font-size: 1.3rem; margin: 0;
+          text-shadow: 0 2px 8px rgba(0,0,0,.8);
+        }
+        .llegada-play-btn {
+          position: absolute; top: 50%; left: 50%;
+          transform: translate(-50%,-50%);
+          width: 64px; height: 64px;
+          background: rgba(35,194,128,0.85);
+          border-radius: 50%;
+          border: none; cursor: pointer;
+          display: flex; align-items: center; justify-content: center;
+          transition: transform .2s ease, background .2s;
+          z-index: 2;
+        }
+        .llegada-play-btn:hover { transform: translate(-50%,-50%) scale(1.1); background: #23C280; }
+        .llegada-play-btn svg { width: 28px; height: 28px; fill: #fff; margin-left: 4px; }
+        .llegada-hero.playing .llegada-play-btn { display: none; }
+        .llegada-hero.playing iframe { pointer-events: all; }
+
+        /* ── Acordeón de datos ── */
+        .llegada-accordion { margin-bottom: 12px; border-radius: 12px; overflow: hidden; }
+        .llegada-accordion-header {
+          background: rgba(255,255,255,0.06);
+          border: 1px solid rgba(255,255,255,0.1);
+          border-radius: 12px;
+          padding: 14px 20px;
+          cursor: pointer;
+          display: flex; align-items: center; justify-content: space-between;
+          color: #fff; font-weight: 600;
+          transition: background .2s;
+        }
+        .llegada-accordion-header:hover { background: rgba(35,194,128,0.12); }
+        .llegada-accordion-header.open { border-bottom-left-radius: 0; border-bottom-right-radius: 0; background: rgba(35,194,128,0.15); }
+        .llegada-accordion-chevron {
+          transition: transform .25s ease;
+          font-size: 1rem; color: #23C280;
+        }
+        .llegada-accordion-header.open .llegada-accordion-chevron { transform: rotate(180deg); }
+        .llegada-accordion-body {
+          max-height: 0; overflow: hidden;
+          transition: max-height .35s ease, padding .25s;
+          background: rgba(255,255,255,0.03);
+          border: 1px solid rgba(255,255,255,0.1);
+          border-top: none;
+          border-radius: 0 0 12px 12px;
+          padding: 0 20px;
+        }
+        .llegada-accordion-body.open { max-height: 500px; padding: 16px 20px; }
+        .llegada-accordion-body p { color: #ccc; margin: 0 0 10px; font-size: 0.9rem; line-height: 1.6; }
+
+        /* ── Tarjetas de rutas con imagen ── */
+        .rutas-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 16px;
+          margin: 20px 0;
+        }
+        .ruta-card {
+          border-radius: 14px;
+          overflow: hidden;
+          position: relative;
+          cursor: pointer;
+          aspect-ratio: 4/3;
+          background: #111;
+        }
+        .ruta-card img {
+          width: 100%; height: 100%;
+          object-fit: cover;
+          transition: transform .4s ease, filter .4s ease;
+          filter: brightness(.6);
+        }
+        .ruta-card:hover img { transform: scale(1.06); filter: brightness(.4); }
+        .ruta-card-info {
+          position: absolute; inset: 0;
+          display: flex; flex-direction: column;
+          justify-content: flex-end;
+          padding: 16px;
+          background: linear-gradient(to top, rgba(0,0,0,.85) 0%, transparent 60%);
+        }
+        .ruta-card-icon { font-size: 1.6rem; margin-bottom: 4px; }
+        .ruta-card-info h4 { color: #fff; margin: 0 0 4px; font-size: 0.95rem; }
+        .ruta-card-detail {
+          color: #23C280; font-size: 0.78rem;
+          max-height: 0; overflow: hidden;
+          transition: max-height .35s ease;
+        }
+        .ruta-card:hover .ruta-card-detail { max-height: 100px; }
+
+        /* ── Contador animado ── */
+        .llegada-stat-row {
+          display: flex; gap: 16px; flex-wrap: wrap; margin: 20px 0;
+        }
+        .llegada-stat-box {
+          flex: 1; min-width: 120px;
+          background: rgba(35,194,128,0.08);
+          border: 1px solid rgba(35,194,128,0.25);
+          border-radius: 12px;
+          padding: 18px 14px; text-align: center;
+        }
+        .llegada-stat-number {
+          font-size: 2rem; font-weight: 800;
+          color: #23C280; display: block;
+        }
+        .llegada-stat-label { color: #aaa; font-size: 0.78rem; margin-top: 4px; }
+
+        /* ── Pill de mascotas ── */
+        .mascota-pills { display: flex; gap: 10px; flex-wrap: wrap; margin: 16px 0; }
+        .mascota-pill {
+          background: rgba(255,255,255,0.06);
+          border: 1px solid rgba(255,255,255,0.12);
+          border-radius: 30px;
+          padding: 8px 16px;
+          cursor: pointer;
+          color: #ccc; font-size: 0.85rem;
+          transition: all .2s;
+        }
+        .mascota-pill:hover, .mascota-pill.active {
+          background: rgba(35,194,128,0.2);
+          border-color: #23C280;
+          color: #fff;
+        }
+        .mascota-detail {
+          background: rgba(255,255,255,0.04);
+          border-radius: 12px; padding: 18px 20px;
+          border-left: 3px solid #23C280;
+          display: none;
+          animation: fadeUp .3s ease;
+        }
+        .mascota-detail.active { display: block; }
+        .mascota-detail h4 { color: #23C280; margin: 0 0 8px; }
+        .mascota-detail p { color: #ccc; margin: 0; font-size: 0.9rem; line-height: 1.6; }
+
+        /* ── Timeline clima ── */
+        .clima-timeline {
+          position: relative;
+          padding-left: 28px;
+          margin-top: 20px;
+        }
+        .clima-timeline::before {
+          content: '';
+          position: absolute; left: 8px; top: 0; bottom: 0;
+          width: 2px; background: rgba(35,194,128,0.3);
+        }
+        .clima-step {
+          position: relative;
+          margin-bottom: 20px;
+          opacity: 0;
+          transform: translateX(-10px);
+          transition: opacity .4s ease, transform .4s ease;
+        }
+        .clima-step.visible { opacity: 1; transform: translateX(0); }
+        .clima-step::before {
+          content: '';
+          position: absolute; left: -24px; top: 6px;
+          width: 10px; height: 10px;
+          background: #23C280; border-radius: 50%;
+          box-shadow: 0 0 8px rgba(35,194,128,0.6);
+        }
+        .clima-step h4 { color: #fff; margin: 0 0 4px; font-size: 0.95rem; }
+        .clima-step p { color: #aaa; margin: 0; font-size: 0.85rem; line-height: 1.5; }
+      </style>
+
+      <div id="pantalla-llegada" class="pantalla-oculta">
+        <div class="container-inicio">
+
+          <!-- Título principal -->
+          <div class="section-header" style="margin-top: 40px;">
+            <h2>¿Cómo llegan las especies invasoras a Panamá?</h2>
+            <p>Las actividades humanas — comercio, turismo y falta de controles — son las principales vías de introducción.</p>
+          </div>
+
+          <!-- ── TABS DE NAVEGACIÓN ── -->
+          <div class="llegada-tabs">
+            <button class="llegada-tab active" data-panel="trafico">🚫 Tráfico ilegal</button>
+            <button class="llegada-tab" data-panel="mascotas">🦎 Mascotas exóticas</button>
+            <button class="llegada-tab" data-panel="puertos">🚢 Puertos y fronteras</button>
+            <button class="llegada-tab" data-panel="clima">🌡️ Cambio climático</button>
+          </div>
+
+          <!-- ══════════════ PANEL 1: TRÁFICO ══════════════ -->
+          <div class="llegada-panel active" id="panel-trafico">
+
+            <!-- Video hero -->
+            <div class="invasive-intro-image">
+              <iframe width="560" height="315" src="https://www.youtube.com/embed/-yOE9P8zY1w?si=P-B7wHAJWCMJ4x6m" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            </div>
+
+            <!-- Acordeones de impacto -->
+            <div class="enterprise-card" style="margin-bottom: 16px; margin-top: 32px;">
+              <p style="color:white; margin:0 0 16px;">El tráfico de especies es la captura, transporte, venta o intercambio ilegal de animales y plantas silvestres. Panamá, por su posición geográfica, es un punto vulnerable de entrada y salida.</p>
+            </div>
+
+            <div class="llegada-accordion">
+              <div class="llegada-accordion-header" onclick="toggleAcordeon(this)">
+                🌿 Pérdida de biodiversidad <span class="llegada-accordion-chevron">▼</span>
+              </div>
+              <div class="llegada-accordion-body">
+                <p>Cada espécimen capturado puede representar la desaparición local de una especie. Panamá alberga el 3% de la biodiversidad mundial y es uno de los 25 puntos críticos del planeta.</p>
+              </div>
+            </div>
+            <div class="llegada-accordion">
+              <div class="llegada-accordion-header" onclick="toggleAcordeon(this)">
+                ⚖️ Desequilibrio ecológico <span class="llegada-accordion-chevron">▼</span>
+              </div>
+              <div class="llegada-accordion-body">
+                <p>Cuando depredadores o presas son extraídos de su ecosistema, las cadenas alimentarias se rompen. Esto puede disparar proliferaciones de plagas y colapsos locales.</p>
+              </div>
+            </div>
+            <div class="llegada-accordion">
+              <div class="llegada-accordion-header" onclick="toggleAcordeon(this)">
+                💰 Impacto económico <span class="llegada-accordion-chevron">▼</span>
+              </div>
+              <div class="llegada-accordion-body">
+                <p>El tráfico ilegal de vida silvestre genera pérdidas millonarias al turismo ecológico y a los productores agrícolas que dependen de polinizadores y controladores de plagas naturales.</p>
+              </div>
+            </div>
+            <div class="llegada-accordion">
+              <div class="llegada-accordion-header" onclick="toggleAcordeon(this)">
+                🦠 Riesgos sanitarios <span class="llegada-accordion-chevron">▼</span>
+              </div>
+              <div class="llegada-accordion-body">
+                <p>Animales silvestres trasladados sin control sanitario pueden portar zoonosis como salmonela, rabia y virus emergentes. El 60% de las enfermedades infecciosas emergentes provienen de la vida silvestre.</p>
+              </div>
+            </div>
+            <div class="llegada-accordion">
+              <div class="llegada-accordion-header" onclick="toggleAcordeon(this)">
+                🔗 Crimen organizado <span class="llegada-accordion-chevron">▼</span>
+              </div>
+              <div class="llegada-accordion-body">
+                <p>El tráfico de especies es el cuarto negocio ilícito más lucrativo del mundo, por detrás de las drogas, armas y personas. Grupos criminales transnacionales operan rutas que atraviesan Panamá.</p>
+              </div>
+            </div>
+
+            <div style="display:flex; gap:10px; margin-top:20px;">
+              <span class="stat-label" style="background:#23C280;padding:5px 15px;border-radius:20px;">MiAMBIENTE</span>
+              <span class="stat-label" style="background:#23C280;padding:5px 15px;border-radius:20px;">CITES</span>
+            </div>
+          </div>
+
+          <!-- ══════════════ PANEL 2: MASCOTAS ══════════════ -->
+          <div class="llegada-panel" id="panel-mascotas">
+
+            <div class="invasive-intro-image">
+              <iframe width="560" height="315" src="https://www.youtube.com/embed/6oqS6pscvDs?si=Wh3B8nTdfwERyRCs" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            </div>
+
+            <p style="color:#ccc; margin-bottom: 16px; font-size:.9rem; line-height:1.6;">
+              Miles de animales exóticos son vendidos como mascotas cada año en Panamá. Cuando crecen o se vuelven difíciles de manejar, sus dueños los liberan — con consecuencias graves para el ecosistema. Selecciona una especie para conocer más:
+            </p>
+
+            <!-- Pills selectoras -->
+            <div class="mascota-pills">
+              <button class="mascota-pill active" data-mascota="tortuga">🐢 Tortuga orejas rojas</button>
+              <button class="mascota-pill" data-mascota="iguana">🦎 Iguana verde</button>
+              <button class="mascota-pill" data-mascota="loro">🦜 Loro frente blanca</button>
+              <button class="mascota-pill" data-mascota="pez">🐠 Peces ornamentales</button>
+            </div>
+
+            <!-- Detalle de cada mascota -->
+            <div class="mascota-detail active" id="mascota-tortuga">
+              <h4>🐢 Tortuga de orejas rojas (Trachemys scripta elegans)</h4>
+              <p>Vendida como mascota pequeña y "linda", puede alcanzar 30 cm y vivir 30 años. Al liberarse en ríos y lagos panameños compite directamente con las tortugas nativas (Rhinoclemmys) por alimento, espacio y lugares de anidación. Ha colonizado estanques del parque natural Metropolitano y áreas del Canal.</p>
+            </div>
+            <div class="mascota-detail" id="mascota-iguana">
+              <h4>🦎 Iguana verde (Iguana iguana)</h4>
+              <p>Aunque nativa en algunas zonas, ejemplares criados en cautiverio son liberados en ambientes donde no existen de forma natural. Al ser herbívoros agresivos, arrasan con vegetación y compiten con iguanas negras (Ctenosaura similis). Además, los iguánidos de cautiverio pueden estar parasitados por organismos no nativos.</p>
+            </div>
+            <div class="mascota-detail" id="mascota-loro">
+              <h4>🦜 Loro frente blanca (Amazona albifrons)</h4>
+              <p>Los loros criados en cautiverio pierden sus patrones de comportamiento natural. Al ser liberados, pueden transmitir enfermedades como psitacosis a poblaciones silvestres de loros nativos y alteran la dinámica de bandadas, desplazando a las especies locales en competencia por nidos y alimento.</p>
+            </div>
+            <div class="mascota-detail" id="mascota-pez">
+              <h4>🐠 Peces ornamentales (diversas especies)</h4>
+              <p>El vaciado de acuarios en ríos y costas es un vector frecuente. Especies como el Plecos (Hypostomus), los peces de colores o tilapias de ornamental escapan a cuerpos de agua naturales y se reproducen rápidamente, desplazando peces nativos y alterando la química del agua al cambiar la vegetación acuática.</p>
+            </div>
+
+          </div>
+
+          <!-- ══════════════ PANEL 3: PUERTOS ══════════════ -->
+          <div class="llegada-panel" id="panel-puertos">
+
+            <p style="color:#ccc; margin: 0 0 20px; font-size:.9rem; line-height:1.6;">
+              La posición geográfica de Panamá — cruce entre dos océanos y dos continentes — la convierte en el mayor nodo logístico de América Latina. Esa misma conectividad abre puertas que son difíciles de controlar.
+            </p>
+
+            <!-- Tarjetas de rutas con imágenes reales via Unsplash/Wikipedia -->
+            <div class="rutas-grid">
+              <div class="ruta-card">
+                <img src="https://tse1.mm.bing.net/th/id/OIP.v25Emg2oEdQzmaxPhzQcMwHaD8?rs=1&pid=ImgDetMain&o=7&rm=3"
+                    alt="Puerto de Balboa"
+                    onerror="this.src='https://images.unsplash.com/photo-1577993671068-f49a1ae73680?w=400&q=70'">
+                <div class="ruta-card-info">
+                  <div class="ruta-card-icon">⚓</div>
+                  <h4>Puerto de Balboa</h4>
+                  <div class="ruta-card-detail">Alto volumen de contenedores dificulta la revisión exhaustiva, permitiendo el ocultamiento de especies vivas y material biológico.</div>
+                </div>
+              </div>
+              <div class="ruta-card">
+                <img src="https://billiken.lat/wp-content/uploads/2022/12/tapon-fb.jpg"
+                    alt="Darién jungle"
+                    onerror="this.src='https://images.unsplash.com/photo-1448375240586-882707db888b?w=400&q=70'">
+                <div class="ruta-card-info">
+                  <div class="ruta-card-icon">🌲</div>
+                  <h4>Tapón del Darién</h4>
+                  <div class="ruta-card-detail">Selva densa y acceso limitado facilitan el tránsito ilegal de fauna y flora por rutas sin control oficial.</div>
+                </div>
+              </div>
+              <div class="ruta-card">
+                <img src="https://www.panamaviejaescuela.com/wp-content/uploads/2014/09/aeropuerto-tocumen-2017.jpg"
+                    alt="Aeropuerto Tocumen">
+                <div class="ruta-card-info">
+                  <div class="ruta-card-icon">✈️</div>
+                  <h4>Aeropuerto de Tocumen</h4>
+                  <div class="ruta-card-detail">Animales pequeños, reptiles o aves son escondidos en equipajes o ropa. Sin inspecciones caninas especializadas, pasan desapercibidos.</div>
+                </div>
+              </div>
+              <div class="ruta-card">
+                <img src="https://media.telemetro.com/p/10c38dafe0e375b79b344164e683a06d/adjuntos/311/imagenes/018/375/0018375689/1200x675/smart/el-canal-panama-cumple-109-anos-historia.png"
+                    alt="Canal de Panamá">
+                <div class="ruta-card-info">
+                  <div class="ruta-card-icon">🚢</div>
+                  <h4>Canal de Panamá</h4>
+                  <div class="ruta-card-detail">Envíos en tránsito pueden pasar sin revisión profunda. Las aguas de lastre también introducen organismos acuáticos invasores.</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="invasive-intro-image">
+              <iframe width="560" height="315" src="https://www.youtube.com/embed/GDbgjTGF82g?si=xbE15tZqrvqwHNnH" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            </div>
+
+          </div>
+
+          <!-- ══════════════ PANEL 4: CLIMA ══════════════ -->
+          <div class="llegada-panel" id="panel-clima">
+
+            <div class="invasive-intro-image">
+              <iframe width="560" height="315" src="https://www.youtube.com/embed/dRKc-qoU4P4?si=CLwwm15q-urH2wlZ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            </div>
+
+            <p style="color:#ccc; margin: 20px 0 8px; font-size:.9rem; line-height:1.6;">
+              El cambio climático no solo calienta el planeta: transforma las reglas del juego ecológico, debilitando a las especies nativas y abriendo espacio a las invasoras.
+            </p>
+
+            <!-- Timeline animado -->
+            <div class="clima-timeline" id="clima-timeline">
+              <div class="clima-step">
+                <h4>🌡️ Aumento de temperaturas</h4>
+                <p>Reptiles e insectos exóticos se adaptan mejor a climas más cálidos. Muchas especies invasoras tienen rangos térmicos óptimos más amplios que las nativas, lo que les da ventaja a medida que el clima cambia.</p>
+              </div>
+              <div class="clima-step">
+                <h4>🌊 Alteración de ecosistemas acuáticos</h4>
+                <p>Las sequías e inundaciones causadas por El Niño y La Niña debilitan a las especies nativas y crean vacíos ecológicos que las invasoras ocupan rápidamente, antes de que el ecosistema se recupere.</p>
+              </div>
+              <div class="clima-step">
+                <h4>🦋 Migración forzada de especies</h4>
+                <p>Los cambios en los patrones de lluvia obligan a animales a desplazarse hacia nuevos territorios, incrementando el contacto entre especies que antes nunca coincidían y potenciando la transmisión de enfermedades y la competencia.</p>
+              </div>
+              <div class="clima-step">
+                <h4>🌿 Mayor vulnerabilidad de Panamá</h4>
+                <p>Con más de 10,000 especies de plantas y 1,000 de aves, Panamá es megadiverso. Pero esa riqueza depende de condiciones climáticas estables. A medida que el clima cambia, los ecosistemas pierden resiliencia y se abren brechas para las invasoras.</p>
+              </div>
+              <div class="clima-step">
+                <h4>🪸 Blanqueamiento coralino</h4>
+                <p>Los arrecifes coralinos de Panamá (Golfo de Chiriquí, Bocas del Toro) sufren blanqueamientos más frecuentes. Los corales debilitados son colonizados por algas invasoras y organismos oportunistas que impiden su recuperación.</p>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+      <script>
+      (function() {
+
+        // ── TABS ──
+        document.querySelectorAll('.llegada-tab').forEach(tab => {
+          tab.addEventListener('click', () => {
+            document.querySelectorAll('.llegada-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.llegada-panel').forEach(p => p.classList.remove('active'));
+            tab.classList.add('active');
+            const panel = document.getElementById('panel-' + tab.dataset.panel);
+            if (panel) {
+              panel.classList.add('active');
+              // Si es clima, disparar animación del timeline
+              if (tab.dataset.panel === 'clima') animarTimeline();
+            }
+          });
+        });
+
+        // ── ACORDEONES ──
+        window.toggleAcordeon = function(header) {
+          const body = header.nextElementSibling;
+          const isOpen = header.classList.contains('open');
+          // Cerrar todos
+          document.querySelectorAll('.llegada-accordion-header').forEach(h => {
+            h.classList.remove('open');
+            h.nextElementSibling.classList.remove('open');
+          });
+          if (!isOpen) {
+            header.classList.add('open');
+            body.classList.add('open');
+          }
+        };
+
+        // ── PILLS MASCOTAS ──
+        document.querySelectorAll('.mascota-pill').forEach(pill => {
+          pill.addEventListener('click', () => {
+            document.querySelectorAll('.mascota-pill').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.mascota-detail').forEach(d => d.classList.remove('active'));
+            pill.classList.add('active');
+            const detail = document.getElementById('mascota-' + pill.dataset.mascota);
+            if (detail) detail.classList.add('active');
+          });
+        });
+
+        // ── VIDEO PLAY ──
+        window.activarVideo = function(heroId, iframeId, videoId) {
+          const hero = document.getElementById(heroId);
+          const iframe = document.getElementById(iframeId);
+          hero.classList.add('playing');
+          iframe.src = 'https://www.youtube.com/embed/' + videoId + '?autoplay=1&rel=0&modestbranding=1';
+        };
+
+        // ── CONTADORES ANIMADOS ──
+        function animarContadores() {
+          document.querySelectorAll('.llegada-stat-number').forEach(el => {
+            const target = parseInt(el.dataset.target);
+            const prefix = el.dataset.prefix || '';
+            let current = 0;
+            const step = Math.ceil(target / 50);
+            const timer = setInterval(() => {
+              current = Math.min(current + step, target);
+              el.textContent = prefix + current.toLocaleString();
+              if (current >= target) clearInterval(timer);
+            }, 30);
+          });
+        }
+
+        // Ejecutar contadores cuando el panel de tráfico sea visible
+        const observer = new IntersectionObserver(entries => {
+          entries.forEach(e => {
+            if (e.isIntersecting) {
+              animarContadores();
+              observer.disconnect();
+            }
+          });
+        }, { threshold: 0.3 });
+
+        const panelTrafico = document.getElementById('panel-trafico');
+        if (panelTrafico) observer.observe(panelTrafico);
+
+        // ── TIMELINE CLIMA ──
+        function animarTimeline() {
+          const steps = document.querySelectorAll('.clima-step');
+          steps.forEach((step, i) => {
+            setTimeout(() => step.classList.add('visible'), i * 150);
+          });
+        }
+
+        // Si el panel clima ya está activo al cargar (por defecto no lo está)
+        if (document.getElementById('panel-clima')?.classList.contains('active')) {
+          animarTimeline();
+        }
+
+      })();
+      </script>
+
+      <div id="pantalla-impacto" class="pantalla-oculta">
+        <div class="container-inicio">
+
+          <!-- ================= HERO ================= -->
+          <div class="enterprise-section">
+            <div class="invasive-intro-grid">
+
+              <div class="invasive-intro-text">
+                <h2>El Impacto de las Especies Invasoras</h2>
+                <p>
+                  El impacto de las especies invasoras en Panamá funciona como un motor de degradación ambiental que altera profundamente la estructura física de los paisajes naturales, desde las selvas tropicales hasta los arrecifes de coral. Esta intrusión biológica no solo desplaza a los organismos nativos, sino que modifica procesos fundamentales como el ciclo del agua y la frecuencia de incendios, transformando ecosistemas tradicionalmente resilientes en zonas frágiles y dominadas por unas pocas especies extranjeras que asfixian la vida local.
+                </p>
+                <p>
+                  Al degradar la calidad de los suelos y los cuerpos de agua, las invasiones biológicas incrementan los costos de mantenimiento y producción, mientras introducen nuevos vectores de enfermedades que amenazan la salud pública, convirtiendo un problema ecológico en un desafío integral para la estabilidad del istmo.
+                </p>
+              </div>
+
+              <div class="invasive-intro-image">
+                <div class="section-image-placeholder"></div>
+                <iframe width="560" height="315" src="https://www.youtube.com/embed/KuTgY-UPZTI?si=xd_qkNbXcHnRnqSX" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+              </div>
+
+            </div>
+          </div>
+
+
+          <!-- ================= COMPETENCIA ================= -->
+          <div class="enterprise-section">
+            <div class="section-header">
+              <h2>Competencia con Especies Nativas</h2>
+              <p>
+                La competencia con especies nativas es el proceso mediante el cual organismos introducidos luchan contra la fauna y flora local por el acceso a recursos vitales como alimento, luz, agua y territorio. En Panamá, este fenómeno suele ser desigual, ya que las especies invasoras poseen rasgos biológicos que las hacen más agresivas y adaptables, permitiéndoles desplazar o eliminar a las poblaciones autóctonas que no están preparadas para enfrentar estas nuevas amenazas en su propio entorno.
+              </p>
+            </div>
+
+            <div class="invasive-topic-grid">
+
+              <div class="enterprise-card">
+                <div class="section-image-placeholder"></div>
+                <img src="https://www.shutterstock.com/image-photo/pack-wolfes-fighting-their-food-600nw-2357287361.jpg" class="section-image">
+                <h3>La lucha por el alimento y el espacio</h3>
+                <p>
+                  Las especies invasoras suelen ser mucho más rápidas y menos "exigentes" que las panameñas. Mientras que un animal nativo puede necesitar un fruto específico, el invasor come casi cualquier cosa. Esto hace que agoten los recursos disponibles rápidamente, dejando a las especies locales sin sustento. En el caso de las plantas, crecen con tal velocidad que tapan la luz del sol, "ahogando" a la vegetación joven que sí pertenece al bosque panameño.
+                </p>
+              </div>
+
+              <div class="enterprise-card">
+                <div class="section-image-placeholder"></div>
+                <img src="https://i.blogs.es/574281/image-20160919-17029-y68vqw/450_1000.jpg" class="section-image">
+                <h3>La ventaja de no tener depredadores</h3>
+                <p>
+                  Un factor clave es que estas especies llegan al país sin los enemigos naturales (parásitos o depredadores) que tenían en su lugar de origen. Esto les permite dedicar toda su energía a reproducirse y expandirse, ocupando el territorio que antes pertenecía a la fauna local. Esta "liberación de enemigos" es una de las razones principales por las que dominan los hábitats.
+                </p>
+              </div>
+
+              <div class="enterprise-card">
+                <div class="section-image-placeholder"></div>
+                  <img src="https://cloudfront-us-east-1.images.arcpublishing.com/infobae/7ET3JQDS6JDATHDP3DVCV75D3Y.jpg" class="section-image">
+                <h3>Riesgos biológicos y enfermedades</h3>
+                <p>
+                  La competencia también ocurre a nivel microscópico. Las especies que llegan pueden ser portadoras de enfermedades o parásitos extraños ante los cuales la fauna panameña no tiene defensas. Esto debilita a las poblaciones nativas, facilitando que la especie invasora tome el control del ecosistema sin resistencia. Por lo que debemos conocer que hacer para evitar los posibles casos de enfermedades que pueden afectar a la fauna y flora local, así como a la salud humana.
+                </p>
+              </div>
+
+            </div>
+          </div>
+
+
+          <!-- ================= DEPREDACIÓN ================= -->
+          <div class="enterprise-section">
+            <div class="invasive-intro-grid">
+
+              <div>
+                <div class="enterprise-card">
+                  <div class="section-image-placeholder"></div>
+                  <img src="https://descargas.intef.es/cedec/proyectoedia/biologia_geologia/contenidos/investigando_los_ecosistemas/cadenas_troficas2.jpg" class="section-image">
+                  <h3>Desequilibrio en la cadena alimenticia</h3>
+                  <p>
+                    Al ser cazadores muy eficientes, las especies invasoras suelen eliminar a los animales que cumplen funciones importantes, como los que limpian los arrecifes o dispersan semillas. Por ejemplo, en las costas del Caribe, la llegada de depredadores extranjeros ha reducido drásticamente la cantidad de peces que mantienen sanos los corales, lo que provoca un efecto dominó que termina dañando todo el ecosistema marino.
+                  </p>
+                </div>
+      <br>
+                <div class="enterprise-card">
+                  <div class="section-image-placeholder"></div>
+                  <img src="https://static.dw.com/image/62052003_1006.webp" class="section-image">
+                  <h3>Impacto en especies vulnerables</h3>
+                  <p>
+                    Panamá posee muchas especies que son únicas y tienen poblaciones pequeñas. La depredación por invasores es especialmente grave para estas especies, ya que no tienen la capacidad de reproducirse tan rápido como son cazadas. Esto lleva a lo que los científicos llaman "vórtices de extinción", donde la presión del depredador externo es tan fuerte que la especie nativa desaparece de zonas enteras del país.
+                  </p>
+                </div>
+              </div>
+
+              <div class="invasive-intro-text">
+                <h2>Depredación de especies locales</h2>
+                <p>
+                  La depredación de especies locales por parte de organismos invasores en Panamá representa una presión directa y letal que desarticula el orden biológico del país. A diferencia de la competencia, donde los animales pelean por el mismo alimento, en este escenario las especies invasoras se alimentan directamente de las nativas, aprovechando que la fauna panameña carece de mecanismos de defensa adaptados para estos nuevos cazadores. Este fenómeno es especialmente destructivo en ecosistemas cerrados, como el Lago Gatún, o en sistemas vulnerables como los arrecifes de coral, donde la introducción de depredadores agresivos ha provocado la caída drástica de poblaciones de peces autóctonos que no saben cómo esconderse o defenderse de estos atacantes desconocidos.
+                  </p>
+                  <p>
+                  Este proceso de consumo excesivo genera un desbalance profundo, ya que los depredadores invasores suelen ser generalistas con una capacidad de caza muy superior a la de los depredadores locales. Al eliminar de forma masiva a las presas nativas, estas especies foráneas no solo reducen la biodiversidad, sino que alteran toda la red de vida; por ejemplo, al desaparecer los peces o aves pequeñas que controlaban poblaciones de insectos o algas, el ecosistema pierde su capacidad de autorregularse.
+                </p>
+              </div>
+
+            </div>
+          </div>
+
+
+          <!-- ================= ALTERACIÓN ESTRUCTURAL ================= -->
+          <div class="enterprise-section">
+            </div>
+            <div class="section-header">
+              <h2>Alteración Estructural de los Ecosistemas</h2>
+              <p>
+                Esta sección se refiere a cómo las especies invasoras no solo afectan a otros seres vivos de forma individual, sino que logran cambiar la arquitectura y el funcionamiento de todo el entorno físico en Panamá.
+              </p>
+            </div>
+
+
+            <div class="diagram-layout">
+
+              <!-- IZQUIERDA -->
+              <div class="diagram-column left">
+
+                <div class="enterprise-card eco-card-content">
+                  <img class="eco-icon" src="https://cdn-icons-png.flaticon.com/512/119/119573.png">
+                  <h3>Lagos y Ríos</h3>
+                  <p>
+                    La alteración en los cuerpos de agua dulce se da principalmente por la invasión de plantas flotantes y peces agresivos. Estas plantas cubren la superficie como una alfombra densa, impidiendo que la luz solar penetre y reduciendo drásticamente los niveles de oxígeno en el agua. Este cambio en la "arquitectura" del río o lago mata a los organismos del fondo y detiene la circulación natural de nutrientes.
+                  </p>
+                </div>
+
+                <div class="enterprise-card eco-card-content">
+                  <img class="eco-icon" src="https://www.shareicon.net/data/512x512/2016/08/05/807113_nature_512x512.png">
+                  <h3>Bosques Tropicales</h3>
+                  <p>
+                    En los bosques, la invasión rompe la estructura de capas (estratos) que permite la vida de miles de especies. Cuando las plantas invasoras colonizan los bordes del bosque, funcionan como una barrera que impide que el bosque se expanda. Al ser especies que aman el sol y arden fácilmente, cambian un bosque húmedo y fresco por uno seco y propenso a incendios.
+                  </p>
+                </div>
+
+              </div>
+
+              <!-- CENTRO -->
+              <div class="diagram-center">
+
+                <svg viewBox="0 0 400 400" class="diagram-svg">
+
+                  <path d="M200 200 C120 150 80 100 40 60" />
+                  <path d="M200 200 C120 250 80 300 40 340" />
+                  <path d="M200 200 C280 150 320 100 360 60" />
+                  <path d="M200 200 C280 250 320 300 360 340" />
+
+                </svg>
+
+                <div class="center-circle">
+                  <img src="https://cdn-icons-png.flaticon.com/512/5207/5207916.png">
+                </div>
+
+              </div>
+
+              <!-- DERECHA -->
+              <div class="diagram-column right">
+
+                <div class="enterprise-card eco-card-content">
+                  <img class="eco-icon" src="https://cdn-icons-png.freepik.com/512/10794/10794923.png">
+                  <h3>Arrecifes Coralinos</h3>
+                  <p>
+                    En el medio marino, la estructura del arrecife depende del equilibrio entre corales y algas. La introducción de especies que eliminan a los peces herbívoros (los que limpian el arrecife) causa que las algas crezcan sin control y asfixien el coral. Sin coral vivo, el arrecife pierde su forma de "edificio" y se convierte en una roca plana, eliminando las grietas y cuevas donde viven los peces comerciales.
+                </div>
+                <div class="enterprise-card eco-card-content">
+                  <img class="eco-icon" src="https://marketplace.canva.com/fb6pg/MAG1pmfb6pg/1/tl/canva-cargo-ship-icon-MAG1pmfb6pg.png">
+                  <h3>Cuenca del Canal</h3>
+                  <p>
+                    Este es quizás el punto más crítico debido a su importancia logística. La alteración estructural aquí afecta la capacidad del suelo para retener agua. Las especies invasoras desplazan a los árboles de raíces profundas que estabilizan los suelos y mantienen los caudales de los ríos que alimentan el Canal. La pérdida de esta cobertura forestal nativa provoca un aumento de la erosión y el depósito de sedimentos en los cauces, lo que obliga a realizar dragados constantes para mantener la vía navegable.
+                </div>
+
+              </div>
+
+            </div>
+          </div>
+
+
+          <!-- ================= PÉRDIDA DE BIODIVERSIDAD ================= -->
+          <div class="enterprise-section">
+            <div class="section-header">
+              <h2>Pérdida de Biodiversidad</h2>
+              <p>
+                Esta sección analiza cómo la presencia de especies invasoras reduce la variedad de vida en el país, provocando que los ecosistemas pierdan su riqueza original y se vuelvan uniformes.
+              </p>
+              </div>
+
+            <div class="invasive-topic-grid">
+
+              <div class="enterprise-card">
+                <div class="section-image-placeholder"></div>
+                <img src="https://cdn-icons-png.freepik.com/512/9087/9087035.png" class="section-image">
+                <h3>Degradación del Agua</h3>
+                <p>
+                  La pérdida de plantas y organismos nativos en las riberas de los ríos y lagos afecta directamente la calidad del agua que consumimos. Cuando las especies invasoras desplazan a la vegetación original, el suelo pierde su capacidad de filtrar contaminantes y sedimentos. Además, ciertas especies invasoras acuáticas alteran la composición química del agua, reduciendo el oxígeno necesario para que la vida nativa prospere. Esto convierte fuentes de agua limpia en ecosistemas degradados que requieren procesos de purificación más costosos.
+                </p>
+              </div>
+
+              <div class="enterprise-card">
+                <div class="section-image-placeholder"></div>
+                  <img src="https://i0.wp.com/biocontroltechnologies.com/wp-content/uploads/2025/06/agriculture.png?resize=512%2C512&ssl=1" class="section-image">
+                <h3>Riesgo Fitosanitario</h3>
+                <p>
+                  La llegada de plantas y pequeños insectos invasores representa una amenaza crítica para la salud de nuestros bosques y cultivos. Al perderse la biodiversidad nativa que servía como "barrera natural" o que albergaba depredadores de plagas, las especies invasoras pueden propagar enfermedades o insectos dañinos con mayor facilidad. Esto pone en riesgo la producción de alimentos en Panamá, ya que las plantas locales no tienen defensas contra estos nuevos patógenos.
+                </p>
+              </div>
+
+              <div class="enterprise-card">
+                <div class="section-image-placeholder"></div>
+                  <img src="https://noticiasdelatierra.com/wp-content/uploads/2023/06/cropped-cropped-logo-nuevo-noticias-de-la-tierra-PhotoRoom.png-PhotoRoom.png" class="section-image">
+                <h3>Homogeneización</h3>
+                <p>
+                  Este fenómeno ocurre cuando la enorme variedad de especies que hace único a Panamá es reemplazada por unas pocas especies invasoras que se ven en todo el mundo. El paisaje deja de ser un mosaico rico en vida para convertirse en un sitio uniforme y "aburrido" biológicamente. Al perderse esta riqueza, el ecosistema se vuelve mucho más frágil; si ocurre una enfermedad o un cambio climático fuerte, no hay diversidad de especies para resistir el golpe.
+                </p>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <div id="pantalla-prevencion" class="pantalla-oculta">
+        <div class="container-inicio">
+
+          <!-- ================= HERO ================= -->
+          <div class="enterprise-section">
+            <div class="invasive-intro-grid">
+
+              <div class="invasive-intro-image">
+                <iframe width="560" height="315" src="https://www.youtube.com/embed/GaFV-T2Mv5U?si=QKjevckyBgzmYvHF" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+              </div>
+
+              <div class="invasive-intro-text">
+                <h2>¿Cómo podemos prevenir y controlar las especies invasoras?</h2>
+                <p>
+                  Para prevenir y controlar las especies invasoras en Panamá, es imperativo fortalecer la vigilancia en fronteras y puntos estratégicos de conectividad global. Al ser un centro neurálgico del comercio marítimo y aéreo, el país requiere protocolos de inspección rigurosos para evitar la entrada accidental de organismos ajenos. La prevención, gestionada a través de entidades como el Ministerio de Ambiente, constituye la barrera más efectiva para proteger la integridad de los ecosistemas locales y evitar daños económicos en sectores clave como la agricultura.
+                </p>
+                <p>
+                  Cuando una especie logra establecerse, el enfoque debe girar hacia la detección temprana y el control poblacional mediante la colaboración ciudadana y científica. Esto implica educar a la población sobre los riesgos de liberar especies exóticas y restaurar los hábitats degradados con flora nativa para aumentar su resiliencia. Un manejo efectivo combina la aplicación de leyes ambientales estrictas con estrategias de campo diseñadas para mitigar el impacto sobre la biodiversidad endémica del istmo.
+                </p>
+              </div>
+
+            </div>
+          </div>
+
+
+        <!-- ================= PARTICIPACIÓN ================= -->
+          <div class="section-header">
+              <h2>Participación de comunidades</h2>
+              <p>
+                La clave para frenar las especies invasoras en Panamá reside en la integración activa de las poblaciones locales, quienes actúan como los custodios directos de los ecosistemas.
+              </p>
+            </div>
+      <section class="participacion-section">
+        <div class="participacion-wrapper">
+
+          <!-- IZQUIERDA -->
+          <div class="participacion-left">
+
+            <img src="https://gefcastor.mma.gob.cl/wp-content/uploads/2022/11/app-chica-e1669738444377.jpeg" class="participacion-img">
+            <img src="https://www.edenred.mx/hs-fs/hubfs/Media_Source_2025_(imagenes_blog)/Mayo/planes-de-incentivos-que-son-y-como-elaborarlos/incentivos-economicos.png?width=900&height=500&name=incentivos-economicos.png" class="participacion-img">
+            <img src="https://one-more-tree.org/es/wp-content/uploads/sites/13/2025/02/599323-870x563-1.jpg" class="participacion-img">
+
+          </div>
+
+          <!-- DERECHA -->
+          <div class="participacion-card">
+
+            <div class="participacion-item">
+              <h3>Sistemas de alerta temprana</h3>
+              <p>
+                Panamá ha fortalecido su capacidad de respuesta mediante plataformas de reporte ciudadano y monitoreo técnico. Permitiendo que la detección de especies invasoras sea reportada en tiempo real, activando protocolos de cuarentena inmediatos para contener el brote antes de su dispersión masiva.
+              </p>
+            </div>
+
+            <div class="participacion-item">
+              <h3>Incentivos económicos</h3>
+              <p>
+                Para motivar la erradicación, se han implementado mecanismos financieros y comerciales que benefician a la población, llegando a organizar torneos de pesca con premios en efectivo e incentivando su venta en restaurantes para que el control de la especie se convierta en una fuente de ingresos sostenible para los pescadores artesanales.
+              </p>
+            </div>
+
+            <div class="participacion-item">
+              <h3>Vigilancia comunitaria</h3>
+              <p>
+                La creación de Comités de Vigilancia Ambiental ha permitido descentralizar la protección de los recursos naturales, haciendo que el empoderamiento de los residentes locales a través de capacitaciones de patrullaje voluntario garanticen que las áreas críticas mantengan coberturas vegetales nativas, sirviendo como una barrera biológica natural contra la propagación de especies invasoras como la paja canalera.
+              </p>
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+          <!-- ================= PROGRAMAS ================= -->
+          <div class="enterprise-section">
+
+            <div class="section-header">
+              <h2>Programas de erradicación y monitoreo</h2>
+              <p>
+                Cuando la prevención falla, se activan protocolos técnicos para eliminar o reducir las poblaciones invasoras.
+              </p>
+            </div>
+
+            <div class="invasive-topic-grid">
+
+              <div class="enterprise-card">
+                <h2 style="color:#23C280;">01.</h2>
+                <h3>Monitoreo constante</h3>
+                <p>
+                  El monitoreo constante se lleva a cabo a través de programas de seguimiento que integran el uso de sistemas de información geográfica y la participación comunitaria. Estas redes de monitoreo permiten a las autoridades mapear la expansión de las especies en tiempo real, facilitando la toma de decisiones basadas en datos científicos sobre el comportamiento y el impacto de estos organismos en los ecosistemas locales.
+                </p>
+              </div>
+
+              <div class="enterprise-card"
+                  style="border:2px solid #23C280; box-shadow:0 0 30px rgba(35,194,128,0.3);">
+                <h2 style="color:#23C280;">02.</h2>
+                <h3>Métodos de control</h3>
+                <p>
+                  Los métodos de control y erradicación aplicados en el territorio nacional varían según la especie y el entorno afectado. En casos específicos, se recurre al control químico supervisado para detener la propagación de malezas que amenazan la biodiversidad nativa o la producción agrícola, siempre bajo protocolos que buscan minimizar el daño colateral al medio ambiente.
+              </div>
+
+              <div class="enterprise-card">
+                <h2 style="color:#23C280;">03.</h2>
+                <h3>Detección temprana</h3>
+                <p>
+                  La detección temprana se realiza mediante una vigilancia rigurosa en los puntos críticos de entrada, como el Canal de Panamá y los aeropuertos internacionales. Este sistema se apoya en listas oficiales de especies prohibidas y protocolos de inspección fitosanitaria que buscan interceptar organismos exóticos antes de que logren establecerse en los ecosistemas locales, evitando así daños económicos y ecológicos irreversibles.
+                </p>
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <!-- ================= EDUCACIÓN ================= -->
+          <div class="enterprise-section">
+
+            <div class="section-header">
+              <h2>Educación ambiental</h2>
+              <p>
+                El objetivo es cambiar comportamientos ciudadanos que facilitan las invasiones biológicas.
+              </p>
+            </div>
+
+            <div class="invasive-topic-grid">
+
+              <div class="enterprise-card" style="text-align:center;">
+                <iframe style="width:100%; aspect-ratio:16/9;" src="https://www.youtube.com/embed/RYpRuBv8ntY?si=6ASODCKVdX9F7sla" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe><br>
+                <h3>Formación obligatoria</h3>
+                <p>Este programa instruye a los trabajadores en la identificación visual de especies críticas y en los procedimientos de contención inmediata para evitar que organismos polizontes abandonen las áreas de aduanas.
+                </p>
+              </div>
+              <div class="enterprise-card" style="text-align:center;">
+                  <iframe style="width:100%; aspect-ratio:16/9;" src="https://www.youtube.com/embed/4wCVVJA2dgA?si=8LpWcPMkepnV7ab3" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe><br>
+            <h3>Campañas de bioseguridad</h3>
+                <p>El objetivo principal es fomentar una cultura de prevención donde la población comprenda que evitar el ingreso accidental de organismos extranjeros es la medida más efectiva para proteger el patrimonio natural y la producción agropecuaria del país.  
+                </p>
+              </div>
+
+              <div class="enterprise-card" style="text-align:center;">
+                <iframe style="width:100%; aspect-ratio:16/9;" src="https://www.youtube.com/embed/on_5LI-8pwg?si=oiV5Ax1S8h8kA2vg" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe><br>
+                <h3>Divulgación de protocolos</h3>
+                <p>Estos documentos detallan los canales de denuncia y las acciones de contención inicial, asegurando que la información sea comprensible y esté al alcance de las comunidades para una respuesta rápida y coordinada.
+                </p>
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <!-- ================= LEYES (ESTILO TIMELINE) ================= -->
+          <div class="enterprise-section">
+
+            <div class="section-header">
+              <h2>Leyes ambientales y controles del Estado</h2>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:30px; max-width:800px; margin:0 auto;">
+
+              <div class="enterprise-card">
+                <h3>01. Ley 24 de 1995 (Ley de Vida Silvestre de Panamá)</h3>
+                <p>Esta norma prohíbe la introducción, trasplante o propagación de especies exóticas que puedan alterar el equilibrio de los ecosistemas nativos. Faculta al Ministerio de Ambiente para decomisar especímenes y sancionar a quienes introduzcan organismos foráneos sin los permisos científicos y técnicos correspondientes.
+                </p>
+              </div>
+
+              <div class="enterprise-card">
+                <h3>02. Convenio sobre la Diversidad Biológica (CDB)</h3>
+                <p>Tratado internacional ratificado por Panamá que obliga al Estado a establecer medidas para prevenir la introducción de especies exóticas invasoras. Bajo este marco global, el país desarrolla su Estrategia Nacional de Biodiversidad, priorizando el control y la erradicación de especies que amenazan hábitats críticos, asegurando que las políticas nacionales estén alineadas con los estándares internacionales de bioseguridad.
+                </p>
+              </div>
+
+              <div class="enterprise-card">
+                <h3>03. Ley 47 de 1996 (Ley de Sanidad Vegetal)</h3>
+                <p>Esta ley otorga al Ministerio de Desarrollo Agropecuario (MIDA) la potestad de declarar estados de emergencia fitosanitaria ante la presencia de plagas o especies invasoras que pongan en riesgo la producción nacional. Establece controles estrictos sobre la importación de material vegetal y faculta a los inspectores para destruir cargamentos contaminados que representen un peligro biológico para los cultivos y bosques del país.
+                </p>
+              </div>
+              <div class="enterprise-card">
+                <h3>04. Ley 23 de 1997 (Normas para la Protección de la Salud Animal)</h3>
+                <p>egula la introducción de animales y productos de origen animal al territorio panameño. A través de la Dirección Nacional de Salud Animal, el Estado aplica medidas cuarentenarias y de vigilancia epidemiológica para evitar el ingreso de especies que funcionen como vectores de enfermedades o que puedan desplazarse de forma invasiva en el medio rural, protegiendo tanto la fauna nativa como el patrimonio pecuario.
+                </p>
+              </div>
+
+              <div class="enterprise-card">
+                <h3>05. Ley 287 de 2022 (Reconocimiento de los Derechos de la Naturaleza)</h3>
+                <p>Es una normativa pionera que eleva a la naturaleza como sujeto de derechos en Panamá. Esta ley obliga al Estado a implementar medidas preventivas y de restauración ante cualquier actividad que altere los ciclos vitales. En el contexto de las especies invasoras, permite fundamentar acciones legales contra la introducción de organismos que degraden la integridad de los ecosistemas, considerándolo una violación directa a los derechos del entorno natural.
+                </p>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ===== MODAL (DEFINICIÓN) ===== -->
+      <div id="miModal" class="modal">
+          <div class="modal-content" style="max-width: 600px;">
+              <span class="close cerrar-modal">&times;</span>
+              <h2 style="color: #23C280;">Diferencias entre especies nativas y no nativas</h2>
+              <div class="tipo-especie" style="margin: 20px 0; padding: 15px; background: rgba(255,255,255,0.05); border-left: 4px solid #23C280;">
+                  <h3 style="color: #23C280;">🌿 Especie nativa (autóctona)</h3>
+                  <p style="color: white;">Es aquella que vive de forma natural en un ecosistema o región, sin intervención humana. Forma parte del equilibrio ecológico y ha evolucionado junto a otras especies del lugar.</p>
+                  <p style="color: #aaa;"><strong>Ejemplo:</strong> Un árbol propio de los bosques tropicales de Panamá que ha existido allí durante miles de años.</p>
+              </div>
+              <div class="tipo-especie" style="margin: 20px 0; padding: 15px; background: rgba(255,255,255,0.05); border-left: 4px solid #23C280;">
+                  <h3 style="color: #23C280;">🌍 Especie no nativa (exótica)</h3>
+                  <p style="color: white;">Es aquella que ha sido introducida en un lugar donde no existía naturalmente, ya sea de manera intencional (agricultura, mascotas, ornamentación) o accidental (transporte, comercio). No siempre causa daños, pero puede convertirse en invasora si se reproduce y afecta el ecosistema.</p>
+              </div>
+          </div>
+      </div>
+
+      <!-- ===== PANTALLAS DE DETALLE DE ESPECIES ===== -->
+      <!-- Pantalla de detalle: Pez León -->
+      <div id="pantalla-detalle-pezleon" class="pantalla-oculta">
+          <div class="container-inicio">
+              <button class="btn-volver-detalle" onclick="mostrarPantalla('especies-animales')">
+                  <i class="fas fa-arrow-left"></i> Volver a Especies
+              </button>
+              
+              <div class="especie-detalle-header">
+                  <div class="especie-detalle-imagen">
+                      <img src="https://cdn0.ecologiaverde.com/es/posts/3/8/3/pez_leon_caracteristicas_e_informacion_de_esta_especie_invasora_4383_orig.jpg" alt="Pez León">
+                  </div>
+                  <div class="especie-detalle-titulo">
+                      <h1>Pez León <span class="nombre-cientifico">(Pterois volitans)</span></h1>
+                      <div class="grado-amenaza-badge grado-alto">ALTO</div>
+                      <p>Este pez de arrecife del Indopacífico se ha convertido en una especie invasora en el Atlántico Occidental, con pocos o ningún depredador. Este pez almendrado está cubierto de rayas rojas y blancas de cebra, y posee aletas largas y elaboradas, además de espinas venenosas. Puede alcanzar entre 30 y 38 centímetros de largo y prefiere vivir cerca de zonas rocosas de coral, donde puede cazar pequeños peces e invertebrados, para luego refugiarse en las grietas. A pesar del elevado número de picaduras que se reportan cada año, esta especie es muy popular en el sector de los acuarios.</p>
+                  </div>
+              </div>
+
+              <div class="especie-detalle-grid">
+                  <!-- Características -->
+                  <div class="detalle-card">
+                      <div class="detalle-card-header">
+                          <i class="fas fa-fish"></i>
+                          <h2>Características</h2>
+                      </div>
+                      <ul class="detalle-lista">
+                          <li><strong>Nombre científico:</strong> Pterois volitans</li>
+                          <li><strong>Tamaño:</strong> Hasta 45 cm de longitud</li>
+                          <li><strong>Peso:</strong> Hasta 1.5 kg</li>
+                          <li><strong>Esperanza de vida:</strong> 10-15 años</li>
+                          <li><strong>Reproducción:</strong> Hasta 30,000 huevos cada 4 días</li>
+                          <li><strong>Veneno:</strong> 18 espinas dorsales venenosas</li>
+                          <li><strong>Origen:</strong> Nativo de la región del Indo-Pacífico (incluyendo Indonesia).</li>
+                      </ul>
+                  </div>
+
+                  <!-- Grado de Amenaza -->
+                  <div class="detalle-card">
+                      <div class="detalle-card-header">
+                          <i class="fas fa-exclamation-triangle"></i>
+                          <h2>Grado de Amenaza</h2>
+                      </div>
+                      <div class="amenaza-indicador">
+                          <div class="amenaza-barra">
+                              <div class="amenaza-nivel" style="width: 95%"></div>
+                          </div>
+                          <p><strong>Nivel:</strong> Crítico (95%)</p>
+                      </div>
+                      <div class="amenaza-detalles">
+                          <p><i class="fas fa-circle" style="color: #ff4444;"></i> <strong>Expansión:</strong> Muy rápida</p>
+                          <p><i class="fas fa-circle" style="color: #ff4444;"></i> <strong>Capacidad reproductiva:</strong> Extremadamente alta</p>
+                          <p><i class="fas fa-circle" style="color: #ffaa00;"></i> <strong>Control:</strong> Difícil</p>
+                      </div>
+                  </div>
+
+                  <!-- Efectos Ecológicos -->
+                  <div class="detalle-card">
+                      <div class="detalle-card-header">
+                          <i class="fas fa-leaf"></i>
+                          <h2>Efectos Ecológicos o Económicos</h2>
+                      </div>
+                      <ul class="detalle-lista">
+                          <li>Depreda juveniles de peces arrecifales nativos</li>
+                          <li>Reduce hasta en 80% el reclutamiento de peces locales</li>
+                          <li>Altera el equilibrio de los arrecifes de coral</li>
+                          <li>Compite con especies nativas por alimento</li>
+                      </ul>
+                  </div>
+
+                  <!-- Vía de introducción -->
+                  <div class="detalle-card">
+                      <div class="detalle-card-header">
+                          <i class="fas fa-info-circle"></i>
+                          <h2>Vía de introducción</h2>
+                      </div>
+                      <p>Fue introducido accidental o voluntariamente a través del comercio de acuarios en el Atlántico y se dispersó hacia Panamá mediante corrientes oceánicas y actividad humana.</p>
+                  </div>
+
+                  <!-- Mapa Interactivo Pez León -->
+                  <div class="detalle-card mapa-card" style="grid-column: 1 / -1;">
+                      <div class="detalle-card-header">
+                          <i class="fas fa-map-marked-alt"></i>
+                          <h2>Distribución en Panamá</h2>
+                      </div>
+                      <p>Click en los puntos para su información</p>
+                      <br>
+                      <div class="leaflet-map-wrapper">
+                          <div id="mapa-pezleon" style="height: 380px; width: 100%;"></div>
+                      </div>
+                      <div class="map-info-bar">
+                          <div>📍 <span>3</span> zonas de presencia confirmada</div>
+                          <div>🌊 Especie marina del Caribe</div>
+                          <div>⚠️ Expansión activa desde 2009</div>
+                      </div>
+                      <div class="map-legend-items">
+                          <div class="map-legend-item"><div class="map-legend-dot" style="background:#ff4444;"></div> Presencia confirmada</div>
+                          <div class="map-legend-item"><div class="map-legend-dot" style="background:#ffaa00;"></div> Avistamientos ocasionales</div>
+                          <div class="map-legend-item"><div class="map-legend-dot" style="background:#23C280; opacity:0.5;"></div> Zona de riesgo</div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+
+      <!-- Pantalla de detalle: Pez Sargento -->
+      <div id="pantalla-detalle-pezsargento" class="pantalla-oculta">
+          <div class="container-inicio">
+              <button class="btn-volver-detalle" onclick="mostrarPantalla('especies-animales')">
+                  <i class="fas fa-arrow-left"></i> Volver a Especies
+              </button>
+              
+              <div class="especie-detalle-header">
+                  <div class="especie-detalle-imagen">
+                      <img src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Cichla_ocellaris_Dvur_zoo_3.jpg" alt="Pez Sargento">
+                  </div>
+                  <div class="especie-detalle-titulo">
+                      <h1>Pez Sargento <span class="nombre-cientifico">(Cichla ocellaris)</span></h1>
+                      <div class="grado-amenaza-badge grado-alto">ALTO</div>
+                      <p>El sargento es una especie voraz y a la vez representativa para la pesca comercial y recreativa. Por ejemplo, en regiones colombianas como la Orinoquia y la Amazonia, es uno de los más apetecidos para la pesca deportiva debido al gran tamaño que alcanza y a las propiedades de su carne.</p>
+                  </div>
+              </div>
+
+              <div class="especie-detalle-grid">
+                  <!-- Características -->
+                  <div class="detalle-card">
+                      <div class="detalle-card-header">
+                          <i class="fas fa-fish"></i>
+                          <h2>Características</h2>
+                      </div>
+                      <ul class="detalle-lista">
+                          <li><strong>Nombre científico:</strong> Cichla ocellaris</li>
+                          <li><strong>Tamaño:</strong> Promedio es de 15 cm, alcanzando hasta 23 cm</li>
+                          <li><strong>Peso:</strong> Peso promedio de 0.5-1 kg</li>
+                          <li><strong>Esperanza de vida:</strong> Tienen una longevidad estimada de hasta 10 años</li>
+                          <li><strong>Reproducción:</strong>  Son ovíparos. Los machos, que se tornan azulados durante la época de cría, limpian un sitio (rocas, estructuras) y atraen a las hembras para desovar. El macho fertiliza los huevos y los defiende ferozmente hasta que eclosionan.</li>
+                          <li><strong>Origen:</strong> Originario de América del Sur, específicamente de la cuenca de los ríos Amazonas y Orinoco (Guayana Francesa, Surinam, Guyana y Brasil).</li>
+                      </ul>
+                  </div>
+
+                  <!-- Grado de Amenaza -->
+                  <div class="detalle-card">
+                      <div class="detalle-card-header">
+                          <i class="fas fa-exclamation-triangle"></i>
+                          <h2>Grado de Amenaza</h2>
+                      </div>
+                      <div class="amenaza-indicador">
+                          <div class="amenaza-barra">
+                              <div class="amenaza-nivel" style="width: 90%"></div>
+                          </div>
+                          <p><strong>Nivel:</strong> Alto (90%)</p>
+                      </div>
+                      <div class="amenaza-detalles">
+                          <p><i class="fas fa-circle" style="color: #ff4444;"></i> <strong>Expansión:</strong> Muy rápida</p>
+                          <p><i class="fas fa-circle" style="color: #ff4444;"></i> <strong>Capacidad reproductiva:</strong> Extremadamente alta</p>
+                          <p><i class="fas fa-circle" style="color: #ffaa00;"></i> <strong>Control:</strong> Difícil</p>
+                      </div>
+                  </div>
+
+                  <!-- Efectos Ecológicos -->
+                  <div class="detalle-card">
+                      <div class="detalle-card-header">
+                          <i class="fas fa-leaf"></i>
+                          <h2>Efectos Ecológicos o Económicos</h2>
+                      </div>
+                      <ul class="detalle-lista">
+                          <li>Depreda juveniles de peces arrecifales nativos</li>
+                          <li>Reduce hasta en 80% el reclutamiento de peces locales</li>
+                          <li>Altera el equilibrio de los arrecifes de coral</li>
+                          <li>Compite con especies nativas por alimento</li>
+                      </ul>
+                  </div>
+
+                  <!-- Vía de introducción -->
+                  <div class="detalle-card">
+                      <div class="detalle-card-header">
+                          <i class="fas fa-info-circle"></i>
+                          <h2>Vía de introducción</h2>
+                      </div>
+                      <p>El descuido en el manejo de un estanque que contenía entre 50 y 100 peces sargento (Cichla monoculus), importados de Buga (Valle) en 1969, permitió que varios ejemplares llegaran a las aguas del lago Gatún, en Panamá. 48 años después de este suceso, se confirma que estos peces introducidos se convirtieron en una especie dominante que ha incidido en la disminución de la fauna nativa.</p>
+                  </div>
+
+                  <!-- Mapa Interactivo Pez Sargento -->
+                  <div class="detalle-card mapa-card" style="grid-column: 1 / -1;">
+                      <div class="detalle-card-header">
+                          <i class="fas fa-map-marked-alt"></i>
+                          <h2>Distribución en Panamá</h2>
+                      </div>
+                      <p>Click en los puntos para su información</p>
+                      <br>
+                      <div class="leaflet-map-wrapper">
+                          <div id="mapa-pezsargento" style="height: 380px; width: 100%;"></div>
+                      </div>
+                      <div class="map-info-bar">
+                          <div>📍 <span>2</span> zonas de presencia confirmada</div>
+                      </div>
+                      <div class="map-legend-items">
+                          <div class="map-legend-item"><div class="map-legend-dot" style="background:#ff4444;"></div> Presencia confirmada</div>
+                          <div class="map-legend-item"><div class="map-legend-dot" style="background:#ffaa00;"></div> Zona de riesgo</div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+
+      <!-- Pantalla de detalle: Tilapia -->
+      <div id="pantalla-detalle-tilapia" class="pantalla-oculta">
+          <div class="container-inicio">
+              <button class="btn-volver-detalle" onclick="mostrarPantalla('especies-animales')">
+                  <i class="fas fa-arrow-left"></i> Volver a Especies
+              </button>
+              
+              <div class="especie-detalle-header">
+                  <div class="especie-detalle-imagen">
+                      <img src="https://www.aquaculturealliance.org/wp-content/uploads/2018/12/STONEHAM-tilapia-Pic-0-960x653.jpg" alt="Tilapia">
+                  </div>
+                  <div class="especie-detalle-titulo">
+                      <h1>Tilapia <span class="nombre-cientifico">(Oreochromis niloticus)</span></h1>
+                      <div class="grado-amenaza-badge grado-medio">Medio/Alto</div>
+                      <p>La tilapia es un pez de agua dulce originario de África, ampliamente cultivado a nivel mundial por su rápido crecimiento, adaptabilidad y sabor suave. Es una fuente de proteína magra, baja en calorías y rica en nutrientes esenciales.</p>
+                  </div>
+              </div>
+
+              <div class="especie-detalle-grid">
+                  <!-- Características -->
+                  <div class="detalle-card">
+                      <div class="detalle-card-header">
+                          <i class="fas fa-fish"></i>
+                          <h2>Características</h2>
+                      </div>
+                      <ul class="detalle-lista">
+                          <li><strong>Nombre científico:</strong> Oreochromis niloticus</li>
+                          <li><strong>Tamaño:</strong> Generalmente mide entre 20 y 40 cm.</li>
+                          <li><strong>Peso:</strong> En condiciones silvestres o de captura, el peso promedio ronda los 600 g, aunque puede alcanzar un máximo de 2.1 kg</li>
+                          <li><strong>Esperanza de vida:</strong> Entre los 9 y 10 años en estado silvestre.</li>
+                          <li><strong>Reproducción:</strong>Una sola hembra puede producir desde 100 hasta 1,500 huevos por desove, dependiendo de su tamaño.</li>
+                          <li><strong>Origen:</strong>Originaria de Asia y África (las variedades presentes en Panamá fueron traídas principalmente de Asia para proyectos productivos).</li>
+                      </ul>
+                  </div>
+
+                  <!-- Grado de Amenaza -->
+                  <div class="detalle-card">
+                      <div class="detalle-card-header">
+                          <i class="fas fa-exclamation-triangle"></i>
+                          <h2>Grado de Amenaza</h2>
+                      </div>
+                      <div class="amenaza-indicador">
+                          <div class="amenaza-barra">
+                              <div class="amenaza-nivel" style="width: 75%"></div>
+                          </div>
+                          <p><strong>Nivel:</strong> Medio/Alto (51% - 75%)</p>
+                      </div>
+                      <div class="amenaza-detalles">
+                          <p><i class="fas fa-circle" style="color: #ff4444;"></i> <strong>Expansión:</strong> Alta tasa de supervivencia</p>
+                          <p><i class="fas fa-circle" style="color: #ff4444;"></i> <strong>Capacidad reproductiva:</strong> Se reproducen desde los tres meses de edad</p>
+                      </div>
+                  </div>
+
+                  <!-- Efectos Ecológicos o Económicos -->
+                  <div class="detalle-card">
+                      <div class="detalle-card-header">
+                          <i class="fas fa-leaf"></i>
+                          <h2>Efectos Ecológicos</h2>
+                      </div>
+                      <ul class="detalle-lista">
+                          <li>Desplazamiento de especies nativas debido a su agresividad y rapidez reproductiva, compite por alimento y espacio con especies locales como el sábalo real y diversas clases de viejas.</li>
+                          <li>Se alimenta de huevos y crías (alevines) de otros peces, lo que reduce las poblaciones nativas.</li>
+                          <li>Al construir nidos en el fondo de los cuerpos de agua, remueve sedimentos, lo que puede afectar la claridad del agua y la vegetación acuática necesaria para otros organismos.</li>
+                          <li>Ha invadido lagos vitales como el Gatún y el Alajuela, donde su alta tolerancia a condiciones de poco oxígeno le permite sobrevivir en áreas donde las especies nativas perecen.</li>
+                      </ul>
+                  </div>
+
+                  <!-- Vía de introducción -->
+                  <div class="detalle-card">
+                      <div class="detalle-card-header">
+                          <i class="fas fa-info-circle"></i>
+                          <h2>Vía de introducción</h2>
+                      </div>
+                      <p>Introducidas intencionalmente para proyectos de acuicultura, con fugas accidentales hacia cuerpos de agua naturales.</p>
+                  </div>
+
+                  <!-- Mapa Interactivo Tilapia -->
+                  <div class="detalle-card mapa-card" style="grid-column: 1 / -1;">
+                      <div class="detalle-card-header">
+                          <i class="fas fa-map-marked-alt"></i>
+                          <h2>Distribución en Panamá</h2>
+                      </div>
+                      <p>Click en los puntos para su información</p>
+                      <br>
+                      <div class="leaflet-map-wrapper">
+                          <div id="mapa-tilapia" style="height: 380px; width: 100%;"></div>
+                      </div>
+                      <div class="map-info-bar">
+                          <div>📍 <span>4</span> Reportes confrimados en el Lago Gatún y diversos ríos a nivel nacional.</div>
+                          <!-- <div>🌊 Especie marina del Caribe</div>
+                          <div>⚠️ Expansión activa desde 2009</div> -->
+                      </div>
+                      <div class="map-legend-items">
+                          <div class="map-legend-item"><div class="map-legend-dot" style="background:#ff4444;"></div> Presencia confirmada</div>
+                          <div class="map-legend-item"><div class="map-legend-dot" style="background:#ffaa00;"></div> Avistamientos ocasionales</div>
+                          <div class="map-legend-item"><div class="map-legend-dot" style="background:#23C280; opacity:0.5;"></div> Zona de alerta</div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+
+      <!-- Pantalla de detalle: Caracol Gigante Africano -->
+      <div id="pantalla-detalle-caracolafricano" class="pantalla-oculta">
+          <div class="container-inicio">
+              <button class="btn-volver-detalle" onclick="mostrarPantalla('especies-animales')">
+                  <i class="fas fa-arrow-left"></i> Volver a Especies
+              </button>
+              
+              <div class="especie-detalle-header">
+                  <div class="especie-detalle-imagen">
+                      <img src="https://upload.wikimedia.org/wikipedia/commons/f/fc/Achatina_fulica_Thailand.jpg" alt="Caracol Gigante Africano">
+                  </div>
+                  <div class="especie-detalle-titulo">
+                      <h1>Caracol Gigante Africano <span class="nombre-cientifico">(Lissachatina fulica)</span></h1>
+                      <div class="grado-amenaza-badge grado-alto">Alto</div>
+                      <p>El caracol gigante africano, es una de las especies exóticas invasoras más dañinas del mundo según la Unión Internacional para la Conservación de la Naturaleza (IUCN). Originario del este de África (Kenia y Tanzania), se ha extendido por zonas tropicales y subtropicales de todo el planeta.</p>
+                  </div>
+              </div>
+
+              <div class="especie-detalle-grid">
+                  <!-- Características -->
+                  <div class="detalle-card">
+                      <div class="detalle-card-header">
+                          <i class="fas fa-fish"></i>
+                          <h2>Características</h2>
+                      </div>
+                      <ul class="detalle-lista">
+                          <li><strong>Nombre científico:</strong> Lissachatina fulica</li>
+                          <li><strong>Tamaño:</strong> Su concha mide normalmente entre 7 y 20 cm de largo, aunque en condiciones óptimas pueden alcanzar los 30 cm. El cuerpo extendido supera fácilmente estas medidas.</li>
+                          <li><strong>Peso:</strong> Un adulto promedio pesa entre 250 y 300 gramos, pero ejemplares grandes pueden llegar a los 500-600 gramos.</li>
+                          <li><strong>Esperanza de vida:</strong> En libertad suelen vivir entre 3 y 5 años. Sin embargo, en condiciones controladas o de cautiverio, pueden llegar hasta los 9 o 10 años.</li>
+                          <li><strong>Reproducción:</strong> Pueden realizar entre 5 y 6 puestas de huevos al año. Cada puesta contiene de 100 a 500 huevos (con un promedio de 200), lo que permite que un solo caracol produzca miles de descendientes en su vida.</li>
+                          <li><strong>Origen:</strong> Nativo de África Oriental.</li>
+                      </ul>
+                  </div>
+
+                  <!-- Grado de Amenaza -->
+                  <div class="detalle-card">
+                      <div class="detalle-card-header">
+                          <i class="fas fa-exclamation-triangle"></i>
+                          <h2>Grado de Amenaza</h2>
+                      </div>
+                      <div class="amenaza-indicador">
+                          <div class="amenaza-barra">
+                              <div class="amenaza-nivel" style="width: 100%"></div>
+                          </div>
+                          <p><strong>Nivel:</strong> Alto (100%)</p>
+                      </div>
+                      <div class="amenaza-detalles">
+                          <p><i class="fas fa-circle" style="color: #ff4444;"></i> <strong>¿Por qué es una amenaza tan alta?</strong> Su grado de peligrosidad se debe a que puede modificar el ciclo del calcio en el suelo, transmitir enfermedades graves a humanos y eliminar plantas nativas de forma masiva, alterando el equilibrio de la biodiversidad local.</p>
+                          <p><i class="fas fa-circle" style="color: #ff4444;"></i> En la mayoría de los países de América y Europa, su tenencia, transporte y comercio están prohibidos y penados por la ley, ya que se le clasifica como una plaga de importancia cuarentenaria.</p>
+                      </div>
+                  </div>
+
+                  <!-- Efectos Ecológicos o Económicos -->
+                  <div class="detalle-card">
+                      <div class="detalle-card-header">
+                          <i class="fas fa-leaf"></i>
+                          <h2>Efectos Ecológicos y Económicos</h2>
+                      </div>
+                      <ul class="detalle-lista">
+                          <li>Desplazamiento de especies nativas: Al competir por el mismo alimento y refugio, el caracol africano suele ganar la batalla a los caracoles locales, llevándolos a la desaparición en esas zonas.</li>
+                          <li>Alteración de suelos: Al consumir grandes cantidades de materia vegetal y excretar sales de calcio de su concha al morir, puede alterar el pH del suelo, afectando a los microorganismos y la química natural del terreno.</li>
+                          <li>Transmisión de patógenos a la fauna: Actúa como huésped intermedio de parásitos que pueden infectar a depredadores locales (aves o mamíferos) que intenten alimentarse de ellos.</li>
+                          <li>Pérdidas agrícolas masivas: Es una plaga polífaga que ataca más de 500 especies vegetales. Destruye cultivos comerciales de alto valor como cacao, café, banano, cítricos, caucho y hortalizas, alimentándose tanto de hojas como de frutos y tallos jóvenes.</li>
+                          <li>Costos de control y erradicación: Los gobiernos y agricultores deben invertir millones de dólares en campañas de recolección, disposición final y uso de molusquicidas específicos.</li>
+                      </ul>
+                  </div>
+
+                  <!-- Vía de introducción -->
+                  <div class="detalle-card">
+                      <div class="detalle-card-header">
+                          <i class="fas fa-info-circle"></i>
+                          <h2>Vía de introducción</h2>
+                      </div>
+                      <p>Ingreso accidental en vehículos o infiltrado en cargamentos de plantas.</p>
+                  </div>
+
+                  <!-- Mapa Interactivo Caracol Gigante Africano  -->
+                  <div class="detalle-card mapa-card" style="grid-column: 1 / -1;">
+                      <div class="detalle-card-header">
+                          <i class="fas fa-map-marked-alt"></i>
+                          <h2>Distribución en Panamá</h2>
+                      </div>
+                      <p>Click en los puntos para su información</p>
+                      <br>
+                      <div class="leaflet-map-wrapper">
+                          <div id="mapa-caracolafricano" style="height: 380px; width: 100%;"></div>
+                      </div>
+                      <div class="map-info-bar">
+                          <div>A finales de 2024, las autoridades panameñas confirmaron que el país sigue libre de la plaga, pero mantienen una alerta fitosanitaria nacional para evitar su ingreso desde países vecinos.</div>
+                          <!-- <div>🌊 Especie marina del Caribe</div>
+                          <div>⚠️ Expansión activa desde 2009</div> -->
+                      </div>
+                      <div class="map-legend-items">
+                          <div class="map-legend-item"><div class="map-legend-dot" style="background:#ff4444;"></div> Zona de alerta máxima</div>
+                          <div class="map-legend-item"><div class="map-legend-dot" style="background:#ffaa00;"></div> Punto de control fitosanitario</div>
+                          <div class="map-legend-item"><div class="map-legend-dot" style="background:#23C280; opacity:0.5;"></div> Punto de control fitosanitario</div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+
+      <!-- Pantalla de detalle: Hormiga Loca -->
+      <div id="pantalla-detalle-hormigaloca" class="pantalla-oculta">
+          <div class="container-inicio">
+              <button class="btn-volver-detalle" onclick="mostrarPantalla('especies-animales')">
+                  <i class="fas fa-arrow-left"></i> Volver a Especies
+              </button>
+              
+              <div class="especie-detalle-header">
+                  <div class="especie-detalle-imagen">
+                      <img src="https://fuedei.org/wp-content/uploads/2020/04/Nylanderia-fulva-01.jpg" alt="Hormiga Loca">
+                  </div>
+                  <div class="especie-detalle-titulo">
+                      <h1>Hormiga Loca <span class="nombre-cientifico">(Nylanderia fulva)</span></h1>
+                      <div class="grado-amenaza-badge grado-alto">Alto</div>
+                      <p> la hormiga loca leonada (Nylanderia fulva) es reconocida como una de las especies invasoras más preocupantes debido a su capacidad para desplazar a la biodiversidad local y afectar sectores productivos clave.</p>
+                  </div>
+              </div>
+
+              <div class="especie-detalle-grid">
+                  <!-- Características -->
+                  <div class="detalle-card">
+                      <div class="detalle-card-header">
+                          <i class="fas fa-fish"></i>
+                          <h2>Características</h2>
+                      </div>
+                      <ul class="detalle-lista">
+                          <li><strong>Nombre científico:</strong> Nylanderia fulva</li>
+                          <li><strong>Tamaño:</strong> Son monomórficas (todas del mismo tamaño), midiendo entre 2.0 y 2.4 mm. La reinas son significativamente más grandes, alcanzando 4.0 mm o más de longitud.</li>
+                          <li><strong>Esperanza de vida:</strong> Su ciclo de vida total (desde huevo a adulto) dura aproximadamente entre 76 y 84 días, aunque como adultos suelen vivir desde unas pocas semanas hasta algunos meses según las condiciones ambientales.</li>
+                          <li><strong>Reproducción:</strong>Las colonias contienen múltiples reinas (a veces cientos), lo que permite un crecimiento poblacional explosivo. Una sola reina puede poner cientos a miles de huevos, permitiendo varias generaciones en un mismo año bajo condiciones óptimas.</li>
+                          <li><strong>Origen:</strong>Nativa de América del Sur, específicamente de la región amazónica de Brasil</li>
+                      </ul>
+                  </div>
+
+                  <!-- Grado de Amenaza -->
+                  <div class="detalle-card">
+                      <div class="detalle-card-header">
+                          <i class="fas fa-exclamation-triangle"></i>
+                          <h2>Grado de Amenaza</h2>
+                      </div>
+                      <div class="amenaza-indicador">
+                          <div class="amenaza-barra">
+                              <div class="amenaza-nivel" style="width: 81%"></div>
+                          </div>
+                          <p><strong>Nivel:</strong> Alto (81%)</p>
+                      </div>
+                      <div class="amenaza-detalles">
+                          <p><i class="fas fa-circle" style="color: #ff4444;"></i> Se clasifica como alto y crítico debido a su naturaleza como especie invasora agresiva que altera ecosistemas, daña la agricultura y afecta la infraestructura humana.</p>
+                      </div>
+                  </div>
+
+                  <!-- Efectos Ecológicos o Económicos -->
+                  <div class="detalle-card">
+                      <div class="detalle-card-header">
+                          <i class="fas fa-leaf"></i>
+                          <h2>Efectos Ecológicos y Económicos</h2>
+                      </div>
+                      <ul class="detalle-lista">
+                          <li>Desplazamiento Masivo de Especies: Reduce la riqueza de especies de artrópodos nativos hasta en un 90% debido a su agresividad y superioridad numérica.</li>
+                          <li>Neutralización Química: Posee la capacidad única de desintoxicar el veneno de especies dominantes como la hormiga de fuego (Solenopsis invicta), logrando eliminarlas de su hábitat.</li>
+                          <li>Ataca a pequeños vertebrados, incluyendo aves y reptiles (como iguanas y serpientes), provocándoles ceguera, asfixia o la muerte por ataques masivos.</li>
+                          <li>Protege a insectos chupadores de savia (áfidos y cochinillas) a cambio de melaza, lo que incrementa las infestaciones en cultivos de caña de azúcar, café, cítricos y cacao.</li>
+                          <li>Tienen una atracción inusual por los campos eléctricos, invadiendo masivamente transformadores, medidores y cajas de fusibles.</li>
+                      </ul>
+                  </div>
+
+                  <!-- Vía de introducción -->
+                  <div class="detalle-card">
+                      <div class="detalle-card-header">
+                          <i class="fas fa-info-circle"></i>
+                          <h2>Vía de introducción</h2>
+                      </div>
+                      <p>Se expande principalmente a través del transporte de mercancías en barcos y el movimiento de suelo o material vegetal contaminado.</p>
+                  </div>
+
+                  <!-- Mapa Interactivo Hormiga Loca -->
+                  <div class="detalle-card mapa-card" style="grid-column: 1 / -1;">
+                      <div class="detalle-card-header">
+                          <i class="fas fa-map-marked-alt"></i>
+                          <h2>Distribución en Panamá</h2>
+                      </div>
+                      <p>Click en los puntos para su información</p>
+                      <br>
+                      <div class="leaflet-map-wrapper">
+                          <div id="mapa-hormigaloca" style="height: 380px; width: 100%;"></div>
+                      </div>
+                      <div class="map-info-bar">
+                          <div>📍 <span>3</span> Zona de presencia confrinada.</div>
+                          <!-- <div>🌊 Especie marina del Caribe</div>
+                          <div>⚠️ Expansión activa desde 2009</div> -->
+                      </div>
+                      <div class="map-legend-items">
+                          <div class="map-legend-item"><div class="map-legend-dot" style="background:#ff4444;"></div> Presencia confirmada</div>
+                          <div class="map-legend-item"><div class="map-legend-dot" style="background:#ffaa00;"></div> Avistamientos documentados</div>
+                          <div class="map-legend-item"><div class="map-legend-dot" style="background:#23C280; opacity:0.5;"></div> Zona de alerta preventiva</div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+
+      <!-- Pantalla de detalle: Gecko Casero Común -->
+      <div id="pantalla-detalle-gecko" class="pantalla-oculta">
+          <div class="container-inicio">
+              <button class="btn-volver-detalle" onclick="mostrarPantalla('especies-animales')">
+                  <i class="fas fa-arrow-left"></i> Volver a Especies
+              </button>
+              
+              <div class="especie-detalle-header">
+                  <div class="especie-detalle-imagen">
+                      <img src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Hemidactylus_frenatus_9700.jpg" alt="Gecko Casero Común">
+                  </div>
+                  <div class="especie-detalle-titulo">
+                      <h1>Gecko Casero Común <span class="nombre-cientifico">(Hemidactylus frenatus)</span></h1>
+                      <div class="grado-amenaza-badge grado-medio">Medio/Alto</div>
+                      <p>El Hemidactylus frenatus (gecko casero común) es una de las especies de lagartijas exóticas más extendidas y exitosas. Aunque es valorado en hogares por consumir insectos, su comportamiento agresivo y territorial lo convierte en una amenaza para la biodiversidad local.</p>
+                  </div>
+              </div>
+
+              <div class="especie-detalle-grid">
+                  <!-- Características -->
+                  <div class="detalle-card">
+                      <div class="detalle-card-header">
+                          <i class="fas fa-fish"></i>
+                          <h2>Características</h2>
+                      </div>
+                      <ul class="detalle-lista">
+                          <li><strong>Nombre científico:</strong> Hemidactylus frenatus</li>
+                          <li><strong>Tamaño:</strong> Pequeña lagartija de 13 a 15 cm con piel delicada y pupilas elípticas verticales</li>
+                          <li><strong>Peso:</strong>  Es un reptil muy ligero. Los adultos pesan típicamente entre 3 y 10 gramos (aprox. 0.1 a 0.35 onzas). En estudios de campo en la región (como en Isla del Coco), se han registrado individuos desde los 0.1 g (juveniles) hasta los 3.6 g.</li>
+                          <li><strong>Esperanza de vida:</strong> Su ciclo de vida es relativamente corto, con un promedio de 5 años. Muchos no superan los 1-2 años debido a depredadores urbanos (gatos, aves) y enfermedades.</li>
+                          <li><strong>Reproducción:</strong>En climas tropicales como el de Panamá, se reproducen durante todo el año. Las hembras ponen 2 huevos por nidada, los cuales son de cáscara dura y resistentes a la desecación.</li>
+                          <li><strong>Origen:</strong>Originario del sur de Asia y la región Indo-Pacífico.</li>
+                      </ul>
+                  </div>
+
+                  <!-- Grado de Amenaza -->
+                  <div class="detalle-card">
+                      <div class="detalle-card-header">
+                          <i class="fas fa-exclamation-triangle"></i>
+                          <h2>Grado de Amenaza</h2>
+                      </div>
+                      <div class="amenaza-indicador">
+                          <div class="amenaza-barra">
+                              <div class="amenaza-nivel" style="width: 71%"></div>
+                          </div>
+                          <p><strong>Nivel:</strong> Medio/Alto (71%)</p>
+                      </div>
+                      <div class="amenaza-detalles">
+                          <p><i class="fas fa-circle" style="color: #ff4444;"></i> Representa un riesgo serio para geckos locales como el gecko enlutado (Lepidodactylus lugubris) y el gecko de cabeza amarilla (Gonatodes albogularis), a los cuales desplaza mediante competencia por alimento y agresividad territorial.</p>
+                      </div>
+                  </div>
+
+                  <!-- Efectos Ecológicos o Económicos -->
+                  <div class="detalle-card">
+                      <div class="detalle-card-header">
+                          <i class="fas fa-leaf"></i>
+                          <h2>Efectos Ecológicos</h2>
+                      </div>
+                      <ul class="detalle-lista">
+                          <li>Es más agresivo y eficiente cazando que los geckos nativos de Panamá, como el Gonatodes albogularis. Al consumir una cantidad desproporcionadamente mayor de insectos, deja sin recursos a las especies locales, reduciendo su salud y capacidad de reproducción.</li>
+                          <li>No solo compite por comida, sino que se alimenta activamente de los juveniles de otras especies de geckos, acelerando su declive poblacional.</li>
+                          <li>Al alcanzar densidades muy altas, puede servir como una fuente de alimento abundante para otros depredadores invasores (como ciertas serpientes), ayudando a que estas otras plagas también prosperen.</li>
+                      </ul>
+                  </div>
+
+                  <!-- Vía de introducción -->
+                  <div class="detalle-card">
+                      <div class="detalle-card-header">
+                          <i class="fas fa-info-circle"></i>
+                          <h2>Vía de introducción</h2>
+                      </div>
+                      <p>Introducción accidental infiltrada en cargamentos de barcos.</p>
+                  </div>
+
+                  <!-- Mapa Interactivo Gecko Casero Común -->
+                  <div class="detalle-card mapa-card" style="grid-column: 1 / -1;">
+                      <div class="detalle-card-header">
+                          <i class="fas fa-map-marked-alt"></i>
+                          <h2>Distribución en Panamá</h2>
+                      </div>
+                      <p>Click en los puntos para su información</p>
+                      <br>
+                      <div class="leaflet-map-wrapper">
+                          <div id="mapa-gecko" style="height: 380px; width: 100%;"></div>
+                      </div>
+                      <div class="map-info-bar">
+                          <div>📍 <span>4</span> Esta ubicado en todo el país, especialmente abundante en las provincias de Panamá y Colón.</div>
+                          <!-- <div>🌊 Especie marina del Caribe</div>
+                          <div>⚠️ Expansión activa desde 2009</div> -->
+                      </div>
+                      <div class="map-legend-items">
+                          <div class="map-legend-item"><div class="map-legend-dot" style="background:#ff4444;"></div> Colonización tota</div>
+                          <div class="map-legend-item"><div class="map-legend-dot" style="background:#ffaa00;"></div> Expansión activa</div>
+                          <div class="map-legend-item"><div class="map-legend-dot" style="background:#23C280; opacity:0.5;"></div> Frente de invasión</div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+
+      <!-- Pantalla de detalle: Rana Coquí Antillana -->
+      <div id="pantalla-detalle-coqui" class="pantalla-oculta">
+          <div class="container-inicio">
+              <button class="btn-volver-detalle" onclick="mostrarPantalla('especies-animales')">
+                  <i class="fas fa-arrow-left"></i> Volver a Especies
+              </button>
+              
+              <div class="especie-detalle-header">
+                  <div class="especie-detalle-imagen">
+                      <img src="https://upload.wikimedia.org/wikipedia/commons/e/e0/Eleutherodactylus_planirostris01.jpg" alt="Rana Coquí Antillana">
+                  </div>
+                  <div class="especie-detalle-titulo">
+                      <h1>Rana Coquí Antillana <span class="nombre-cientifico">(Eleutherodactylus planirostris)</span></h1>
+                      <div class="grado-amenaza-badge grado-medio">Medio</div>
+                      <p>En Panamá, Eleutherodactylus planirostris es considerada una de las tres especies de ranas invasoras detectadas en el país, junto con el sapo común (Rhinella horribilis) y la rana toro (Lithobates catesbeianus). Su presencia representa un desafío silencioso debido a su pequeño tamaño y comportamiento críptico. </p>
+                  </div>
+              </div>
+
+              <div class="especie-detalle-grid">
+                  <!-- Características -->
+                  <div class="detalle-card">
+                      <div class="detalle-card-header">
+                          <i class="fas fa-fish"></i>
+                          <h2>Características</h2>
+                      </div>
+                      <ul class="detalle-lista">
+                          <li><strong>Nombre científico:</strong> Eleutherodactylus planirostris</li>
+                          <li><strong>Tamaño:</strong> Hembras: Son más grandes, alcanzando entre 27 y 32 mm. Machos: Son notablemente menores, midiendo entre 16 y 24 mm.</li>
+                          <li><strong>Peso:</strong>  Un adulto promedio suele pesar entre 0.5 y 2 gramos. Su ligereza les permite esconderse fácilmente entre las hojas y ser transportadas en macetas sin ser detectadas.</li>
+                          <li><strong>Esperanza de vida:</strong> Se estima que viven entre 1 y 2 años en su hábitat natural.</li>
+                          <li><strong>Reproducción:</strong>No ponen huevos en el agua ni tienen renacuajos. Los huevos se depositan en tierra húmeda, bajo hojarasca o macetas.</li>
+                          <li><strong>Origen:</strong>riginaria de las Antillas, incluyendo Cuba, Bahamas e Islas Caimán.</li>
+                      </ul>
+                  </div>
+
+                  <!-- Grado de Amenaza -->
+                  <div class="detalle-card">
+                      <div class="detalle-card-header">
+                          <i class="fas fa-exclamation-triangle"></i>
+                          <h2>Grado de Amenaza</h2>
+                      </div>
+                      <div class="amenaza-indicador">
+                          <div class="amenaza-barra">
+                              <div class="amenaza-nivel" style="width: 50%"></div>
+                          </div>
+                          <p><strong>Nivel:</strong> Medio (50%)</p>
+                      </div>
+                      <div class="amenaza-detalles">
+                          <p><i class="fas fa-circle" style="color: #ff4444;"></i> Al alcanzar densidades poblacionales altísimas, "limpian" el suelo de micro-invertebrados (ácaros, colémbolos, hormigas). Esto priva de alimento a especies nativas pequeñas y altera el proceso de descomposición de la hojarasca.</p>
+                          <p><i class="fas fa-circle" style="color: #ff4444;"></i> Sus sonidos pueden ser tan fuertes que desplazan acústicamente a otros anfibios locales.</p>
+                      </div>
+                  </div>
+
+                  <!-- Efectos Ecológicos o Económicos -->
+                  <div class="detalle-card">
+                      <div class="detalle-card-header">
+                          <i class="fas fa-leaf"></i>
+                          <h2>Efectos Ecológicos</h2>
+                      </div>
+                      <ul class="detalle-lista">
+                          <li>Son depredadores activos de la hojarasca que se alimentan principalmente de hormigas, ácaros, colémbolos y arañas. En densidades altas, se estima que pueden consumir hasta 129,000 invertebrados por hectárea cada noche.</li>
+                          <li>En varias regiones, las hormigas constituyen entre el 30% y 40% de su dieta. Esto puede reducir drásticamente las poblaciones de insectos beneficiosos que controlan otras plagas o que son esenciales para la salud del suelo.</li>
+                          <li>Al no tener una etapa de renacuajo, puede colonizar áreas donde los anfibios nativos no pueden reproducirse por falta de agua estancada, desplazándolos gradualmente de entornos urbanos y suburbanos.</li>
+                      </ul>
+                  </div>
+
+                  <!-- Vía de introducción -->
+                  <div class="detalle-card">
+                      <div class="detalle-card-header">
+                          <i class="fas fa-info-circle"></i>
+                          <h2>Vía de introducción</h2>
+                      </div>
+                      <p>Dispersión accidental a través del comercio de plantas ornamentales.</p>
+                  </div>
+
+                  <!-- Mapa Interactivo Rana Coquí Antillana -->
+                  <div class="detalle-card mapa-card" style="grid-column: 1 / -1;">
+                      <div class="detalle-card-header">
+                          <i class="fas fa-map-marked-alt"></i>
+                          <h2>Distribución en Panamá</h2>
+                      </div>
+                      <p>Click en los puntos para su información</p>
+                      <br>
+                      <div class="leaflet-map-wrapper">
+                          <div id="mapa-coqui" style="height: 380px; width: 100%;"></div>
+                      </div>
+                      <div class="map-info-bar">
+                          <div>📍 <span>3</span> Esta ubicado en todo el país, detectada en la provincia de Panamá y zonas urbanas aledañas.</div>
+                          <!-- <div>🌊 Especie marina del Caribe</div>
+                          <div>⚠️ Expansión activa desde 2009</div> -->
+                      </div>
+                      <div class="map-legend-items">
+                          <div class="map-legend-item"><div class="map-legend-dot" style="background:#ff4444;"></div> Presencia confirmada</div>
+                          <div class="map-legend-item"><div class="map-legend-dot" style="background:#ffaa00;"></div> Expansión reciente</div>
+                          <div class="map-legend-item"><div class="map-legend-dot" style="background:#23C280; opacity:0.5;"></div> Frente de expansión</div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+
+      <!-- Pantalla de detalle: Paja Canalera -->
+      <div id="pantalla-detalle-pajac" class="pantalla-oculta">
+          <div class="container-inicio">
+              <button class="btn-volver-detalle" onclick="mostrarPantalla('especies-plantas')">
+                  <i class="fas fa-arrow-left"></i> Volver a Especies
+              </button>
+              
+              <div class="especie-detalle-header">
+                  <div class="especie-detalle-imagen">
+                      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSezPeWVQu3xY51YUqS_Esow44FI0qdOobifw&s" alt="Paja Canalera">
+                  </div>
+                  <div class="especie-detalle-titulo">
+                      <h1>Paja Canalera <span class="nombre-cientifico">(Saccharum spontaneum)</span></h1>
+                      <div class="grado-amenaza-badge grado-alto">ALTO</div>
+                      <p>La paja canalera (Saccharum spontaneum) es considerada una de las especies invasoras más agresivas y difíciles de controlar en Panamá. Su presencia ha transformado drásticamente el paisaje, especialmente en la Cuenca del Canal, debido a su capacidad para desplazar la vegetación nativa y alterar los ciclos naturales de regeneración del bosque. </p>
+                  </div>
+              </div>
+
+              <div class="especie-detalle-grid">
+                  <div class="detalle-card">
+                      <div class="detalle-card-header">
+                          <i class="fas fa-seedling"></i>
+                          <h2>Características</h2>
+                      </div>
+                      <ul class="detalle-lista">
+                          <li><strong>Altura:</strong> Puede alcanzar entre 3 y 4 metros de altura. Su crecimiento es veloz, pudiendo aumentar más de un metro en pocos días bajo condiciones óptimas.</li>
+                          <li><strong>Tallos (Culmos):</strong> Son erectos, delgados (0.3 a 1.5 cm de diámetro) y fibrosos. A diferencia de la caña de azúcar comercial, tienen muy poco jugo y un bajo contenido de sacarosa (3-7%).</li>
+                          <li><strong>Sistema Radicular y Reproducción:</strong>  Posee un sistema de tallos subterráneos (rizomas) muy profundo y resistente. Estos rizomas permiten que la planta sobreviva a incendios y rebrote con más fuerza después de ser quemada.</li>
+                          <li><strong>Adaptabilidad:</strong> Soporta suelos degradados, inundaciones temporales y sequías prolongadas.</li>
+                          <li><strong>Origen:</strong>  Nativa del Viejo Mundo (específicamente del Sudeste Asiático y partes de África).</li>
+                      </ul>
+                  </div>
+
+                  <div class="detalle-card">
+                      <div class="detalle-card-header">
+                          <i class="fas fa-exclamation-triangle"></i>
+                          <h2>Grado de Amenaza</h2>
+                      </div>
+                      <div class="amenaza-indicador">
+                          <div class="amenaza-barra">
+                              <div class="amenaza-nivel" style="width: 95%"></div>
+                          </div>
+                          <p><strong>Nivel:</strong> Alto (95%)</p>
+                          <p><i class="fas fa-circle" style="color: #ff4444;"></i> El grado de amenaza de la paja canalera en Panamá es considerado crítico y de alta prioridad, especialmente para la seguridad hídrica y la biodiversidad del país. Se clasifica como una de las malezas más nocivas del mundo (incluida en listas de especies invasoras de alto impacto).</p>
+                          <p><i class="fas fa-circle" style="color: #ff4444;"></i> Amenaza a la Operación del Canal de Panamá: Es la principal amenaza para el reabastecimiento de la cuenca hidrográfica. Al impedir que el bosque nativo se regenere, la paja canalera no permite que el suelo retenga agua de lluvia. </p>
+                      </div>
+                  </div>
+
+                  <div class="detalle-card">
+                      <div class="detalle-card-header">
+                          <i class="fas fa-leaf"></i>
+                          <h2>Efectos Ecológicos</h2>
+                      </div>
+                      <ul class="detalle-lista">
+                          <li>Durante la estación seca, la paja se vuelve extremadamente inflamable. Los incendios que se originan en estas áreas devastan la flora y fauna nativa y destruyen la capa de materia orgánica del suelo.</li>
+                          <li>Su crecimiento agresivo (más de un metro en pocos días) impide que el bosque natural se recupere, ya que cubre y asfixia a los árboles nativos recién plantados o germinados.</li>
+                          <li>Altera el hábitat acuático nativo</li>
+                          <li>Crea "desiertos verdes" biológicamente pobres que ofrecen poco valor para la vida silvestre, desplazando a especies de aves, mamíferos y reptiles que no encuentran alimento ni refugio en estos rodales impenetrables.</li>
+                      </ul>
+                  </div>
+
+                  <!-- Vía de introducción -->
+                  <div class="detalle-card">
+                      <div class="detalle-card-header">
+                          <i class="fas fa-info-circle"></i>
+                          <h2>Vía de introducción</h2>
+                      </div>
+                      <p>Probablemente intencional en 1939 como parte de una colección de variedades de caña de azúcar en los Jardines Experimentales (Summit). </p>
+                  </div>
+
+                  <div class="detalle-card mapa-card" style="grid-column: 1 / -1;">
+                      <div class="detalle-card-header">
+                          <i class="fas fa-map-marked-alt"></i>
+                          <h2>Distribución en Panamá</h2>
+                      </div>
+                      <p>Click en los puntos para su información</p>
+                      <div class="leaflet-map-wrapper">
+                          <div id="mapa-pajac" style="height: 380px; width: 100%;"></div>
+                      </div>
+                      <div class="map-info-bar">
+                          <div>📍 <span>4</span> Invade masivamente la Cuenca del Canal, con densidades críticas en Gamboa, Summit y Paraíso.</div>
+                      </div>
+                      <div class="map-legend-items">
+                          <div class="map-legend-item"><div class="map-legend-dot" style="background:#ff4444;"></div> Presencia confirmada</div>
+                          <div class="map-legend-item"><div class="map-legend-dot" style="background:#ffaa00;"></div> Expansión activa</div>
+                          <div class="map-legend-item"><div class="map-legend-dot" style="background:#23C280; opacity:0.5;"></div> Frente de invasión</div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+
+      <!-- Pantalla de detalle: Rana Toro-->
+      <!-- <div id="pantalla-detalle-ranatoro" class="pantalla-oculta">
+          <div class="container-inicio">
+              <button class="btn-volver-detalle" onclick="mostrarPantalla('especies-animales')">
+                  <i class="fas fa-arrow-left"></i> Volver a Especies
+              </button>
+              
+              <div class="especie-detalle-header">
+                  <div class="especie-detalle-imagen">
+                      <img src="https://www.bioparcfuengirola.es/wp-content/uploads/2024/04/RANA-TORO3.jpg" alt="Rana Toro">
+                  </div>
+                  <div class="especie-detalle-titulo">
+                      <h1>Rana Toro <span class="nombre-cientifico">(Lithobates catesbeianus)</span></h1>
+                      <div class="grado-amenaza-badge grado-alto">ALTO</div>
+                      <p>Anfibio depredador que amenaza a las especies nativas de ranas en Panamá.</p>
+                  </div>
+              </div>
+
+              <div class="especie-detalle-grid">
+                  <div class="detalle-card">
+                      <div class="detalle-card-header">
+                          <i class="fas fa-frog"></i>
+                          <h2>Características</h2>
+                      </div>
+                      <ul class="detalle-lista">
+                          <li><strong>Tamaño:</strong> Hasta 20 cm (cuerpo)</li>
+                          <li><strong>Peso:</strong> Hasta 750 gramos</li>
+                          <li><strong>Reproducción:</strong> Hasta 20,000 huevos por puesta</li>
+                          <li><strong>Alimentación:</strong> Insectos, peces, aves, otros anfibios</li>
+                      </ul>
+                  </div>
+
+                  <div class="detalle-card">
+                      <div class="detalle-card-header">
+                          <i class="fas fa-exclamation-triangle"></i>
+                          <h2>Grado de Amenaza</h2>
+                      </div>
+                      <div class="amenaza-indicador">
+                          <div class="amenaza-barra">
+                              <div class="amenaza-nivel" style="width: 85%"></div>
+                          </div>
+                          <p><strong>Nivel:</strong> Alto (85%)</p>
+                      </div>
+                      <div class="amenaza-detalles">
+                          <p><i class="fas fa-circle" style="color: #ff4444;"></i> <strong>Transmite:</strong> Quitridiomicosis (hongo letal)</p>
+                          <p><i class="fas fa-circle" style="color: #ffaa00;"></i> <strong>Competencia:</strong> Muy agresiva</p>
+                      </div>
+                  </div>
+
+                  <div class="detalle-card">
+                      <div class="detalle-card-header">
+                          <i class="fas fa-leaf"></i>
+                          <h2>Efectos Ecológicos</h2>
+                      </div>
+                      <ul class="detalle-lista">
+                          <li>Depreda ranas nativas en peligro de extinción</li>
+                          <li>Portadora asintomática del hongo quitridio</li>
+                          <li>Compite por hábitat con especies locales</li>
+                          <li>Altera cadenas tróficas en humedales</li>
+                      </ul>
+                  </div>
+
+                  <div class="detalle-card">
+                      <div class="detalle-card-header">
+                          <i class="fas fa-chart-line"></i>
+                          <h2>Efectos Económicos</h2>
+                      </div>
+                      <ul class="detalle-lista">
+                          <li>Afecta criaderos de peces y camarones</li>
+                          <li>Costos de control en áreas protegidas</li>
+                          <li>Daños a la acuicultura local</li>
+                      </ul>
+                  </div>
+
+                  <div class="detalle-card mapa-card" style="grid-column: 1 / -1;">
+                      <div class="detalle-card-header">
+                          <i class="fas fa-map-marked-alt"></i>
+                          <h2>Distribución en Panamá</h2>
+                      </div>
+                      <div class="leaflet-map-wrapper">
+                          <div id="mapa-ranatoro" style="height: 380px; width: 100%;"></div>
+                      </div>
+                      <div class="map-info-bar">
+                          <div>📍 <span>4</span> provincias afectadas</div>
+                          <div>🌿 Especie de humedales y tierras agrícolas</div>
+                          <div>⚠️ Proliferación vía criaderos ilegales</div>
+                      </div>
+                      <div class="map-legend-items">
+                          <div class="map-legend-item"><div class="map-legend-dot" style="background:#ff4444;"></div> Presencia confirmada</div>
+                          <div class="map-legend-item"><div class="map-legend-dot" style="background:#ffaa00;"></div> Criaderos detectados</div>
+                          <div class="map-legend-item"><div class="map-legend-dot" style="background:#23C280; opacity:0.5;"></div> Zona de riesgo</div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div> -->
+
+      <!-- Pantalla de detalle: Jacinto de Agua -->
+      <div id="pantalla-detalle-jacinto" class="pantalla-oculta">
+          <div class="container-inicio">
+              <button class="btn-volver-detalle" onclick="mostrarPantalla('especies-plantas')">
+                  <i class="fas fa-arrow-left"></i> Volver a Especies
+              </button>
+              
+              <div class="especie-detalle-header">
+                  <div class="especie-detalle-imagen">
+                      <img src="https://todoviveros.com/wp-content/uploads/2021/03/Jacintos-de-Agua-3.jpg" alt="Jacinto de Agua">
+                  </div>
+                  <div class="especie-detalle-titulo">
+                      <h1>Jacinto de Agua <span class="nombre-cientifico">(Eichhornia crassipes)</span></h1>
+                      <div class="grado-amenaza-badge grado-alto">ALTO</div>
+                      <p>En Panamá, el jacinto de agua (conocido localmente como lirio de agua o ninfa) es una de las especies invasoras más críticas, especialmente por su impacto en la operatividad del Canal de Panamá y la salud de sus ecosistemas de agua dulce.</p>
+                  </div>
+              </div>
+
+              <div class="especie-detalle-grid">
+                  <div class="detalle-card">
+                      <div class="detalle-card-header">
+                          <i class="fas fa-seedling"></i>
+                          <h2>Características</h2>
+                      </div>
+                      <ul class="detalle-lista">
+                          <li><strong>Familia:</strong> Pontederiaceae</li>
+                          <li><strong>Crecimiento:</strong> Hasta 2 metros por día</li>
+                          <li><strong>Reproducción:</strong> Semillas y estolones</li>
+                          <li><strong>Cobertura:</strong> Originario de América del Sur, específicamente de la cuenca del Amazonas en Brasil.</li>
+                          <li><strong>Origen:</strong> Originario de América del Sur, específicamente de la cuenca del Amazonas en Brasil.</li>
+                      </ul>
+                  </div>
+
+                  <div class="detalle-card">
+                      <div class="detalle-card-header">
+                          <i class="fas fa-exclamation-triangle"></i>
+                          <h2>Grado de Amenaza</h2>
+                      </div>
+                      <div class="amenaza-indicador">
+                          <div class="amenaza-barra">
+                              <div class="amenaza-nivel" style="width: 90%"></div>
+                          </div>
+                          <p><strong>Nivel:</strong> Crítico (90%)</p>
+                          <p><i class="fas fa-circle" style="color: #ff4444;"></i> Atasca infraestructuras hidráulicas (turbinas y canales) y eleva costos de mantenimiento del Canal.</p>
+                      </div>
+                  </div>
+
+                  <div class="detalle-card">
+                      <div class="detalle-card-header">
+                          <i class="fas fa-leaf"></i>
+                          <h2>Efectos Ecológicos</h2>
+                      </div>
+                      <ul class="detalle-lista">
+                          <li>Bloquea luz solar en cuerpos de agua</li>
+                          <li>Reduce oxígeno disuelto (mortalidad de peces)</li>
+                          <li>Altera el hábitat acuático nativo</li>
+                          <li>Facilita proliferación de mosquitos</li>
+                      </ul>
+                  </div>
+
+                  <!-- Vía de introducción -->
+                  <div class="detalle-card">
+                      <div class="detalle-card-header">
+                          <i class="fas fa-info-circle"></i>
+                          <h2>Vía de introducción</h2>
+                      </div>
+                      <p>Introducción voluntaria como planta ornamental para estanques. </p>
+                  </div>
+
+                  <div class="detalle-card mapa-card" style="grid-column: 1 / -1;">
+                      <div class="detalle-card-header">
+                          <i class="fas fa-map-marked-alt"></i>
+                          <h2>Distribución en Panamá</h2>
+                      </div>
+                      <p>Click en los puntos para su información</p>
+                      <br>
+                      <div class="leaflet-map-wrapper">
+                          <div id="mapa-jacinto" style="height: 380px; width: 100%;"></div>
+                      </div>
+                      <div class="map-info-bar">
+                          <div>📍 <span>5</span> cuerpos de agua afectados</div>
+                          <div>💧 Especie acuática flotante</div>
+                          <div>⚠️ Crecimiento de hasta 2m/día en condiciones ideales</div>
+                      </div>
+                      <div class="map-legend-items">
+                          <div class="map-legend-item"><div class="map-legend-dot" style="background:#ff4444;"></div> Cobertura severa</div>
+                          <div class="map-legend-item"><div class="map-legend-dot" style="background:#ffaa00;"></div> Cobertura moderada</div>
+                          <div class="map-legend-item"><div class="map-legend-dot" style="background:#23C280; opacity:0.5;"></div> Zona de riesgo hídrico</div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+
+      <!-- Pantalla de detalle: Tulipán Africano -->
+      <div id="pantalla-detalle-tulipan" class="pantalla-oculta">
+          <div class="container-inicio">
+              <button class="btn-volver-detalle" onclick="mostrarPantalla('especies-plantas')">
+                  <i class="fas fa-arrow-left"></i> Volver a Especies
+              </button>
+              
+              <div class="especie-detalle-header">
+                  <div class="especie-detalle-imagen">
+                      <img src="https://www.catorce6.com/images/noticias/breves/tulipanafricano_600ok.jpg" alt="Tulipán Africano">
+                  </div>
+                  <div class="especie-detalle-titulo">
+                      <h1>Tulipán Africano <span class="nombre-cientifico">(Spathodea campanulata)</span></h1>
+                      <div class="grado-amenaza-badge grado-alto">ALTO</div>
+                      <p>En Panamá, el Tulipán Africano (Spathodea campanulata) es considerado una de las especies exóticas introducidas más problemáticas debido a su agresivo comportamiento invasor y su impacto letal sobre la fauna local.</p>
+                  </div>
+              </div>
+
+              <div class="especie-detalle-grid">
+                  <div class="detalle-card">
+                      <div class="detalle-card-header">
+                          <i class="fas fa-seedling"></i>
+                          <h2>Características</h2>
+                      </div>
+                      <ul class="detalle-lista">
+                          <li><strong>Porte y Crecimiento: </strong> Es un árbol de rápido crecimiento que alcanza habitualmente entre 7 y 25 metros de altura. Su copa es redondeada y densa, proporcionando una sombra profunda.</li>
+                          <li><strong>Tronco y Madera: </strong>  Posee un tronco alto con corteza oscura y fisurada que desarrolla contrafuertes en la base con la edad. Su madera es extremadamente blanda y quebradiza, lo que lo hace propenso a romperse con vientos fuertes.</li>
+                          <li><strong>Flores:</strong> Son grandes (aprox. 10 cm), con forma de campana o copa y color naranja escarlata (raramente amarillas). Se agrupan en racimos terminales muy vistosos.</li>
+                          <li><strong>Frutos y Semillas: </strong> Produce cápsulas erectas y leñosas de hasta 20 cm de largo que contienen numerosas semillas aladas y transparentes, las cuales se dispersan fácilmente con el viento.</li>
+                          <li><strong>Mecanismo de Agua: </strong> Los capullos cerrados contienen un líquido acuoso. Las flores abiertas recolectan agua de lluvia, lo que sirve de hidratación para aves, pero se convierte en una trampa mortal para insectos debido a la toxicidad de su néctar. </li>
+                      </ul>
+                  </div>
+
+                  <div class="detalle-card">
+                      <div class="detalle-card-header">
+                          <i class="fas fa-exclamation-triangle"></i>
+                          <h2>Grado de Amenaza</h2>
+                      </div>
+                      <div class="amenaza-indicador">
+                          <div class="amenaza-barra">
+                              <div class="amenaza-nivel" style="width: 90%"></div>
+                          </div>
+                          <p><strong>Nivel:</strong> Alto (90%)</p>
+                          <p><i class="fas fa-circle" style="color: #ff4444;"></i> El tulipán africano posee un alto grado de amenaza debido a su clasificación como una de las 100 especies exóticas invasoras más dañinas del mundo por la Unión Internacional para la Conservación de la Naturaleza (UICN).</p>
+                          <p><i class="fas fa-circle" style="color: #ff4444;"></i> Es conocido como la "tumba de las abejas". Su néctar y polen contienen compuestos alcaloides que resultan tóxicos y letales para los polinizadores nativos, especialmente abejas sin aguijón (Meliponini), que mueren al alimentarse o quedan atrapadas y se ahogan en el agua acumulada dentro de las flores.</p>
+                      </div>
+                  </div>
+
+                  <div class="detalle-card">
+                      <div class="detalle-card-header">
+                          <i class="fas fa-leaf"></i>
+                          <h2>Efectos Ecológicos</h2>
+                      </div>
+                      <ul class="detalle-lista">
+                          <li>Su rápido crecimiento y dispersión masiva de semillas por el viento le permiten asfixiar y desplazar a especies autóctonas en bosques secundarios y bordes de selva</li>
+                          <li>Al dominar un área, su sombra densa impide el crecimiento de plantas del sotobosque, reduciendo drásticamente la biodiversidad local. </li>
+                          <li>Sus raíces agresivas pueden causar daños costosos en aceras, tuberías y sistemas de drenaje. Además, su madera débil y quebradiza genera gastos constantes en remoción de escombros tras tormentas tropicales en la Ciudad de Panamá.</li>
+                          <li>El manejo de esta especie es complejo y costoso; cortar el árbol no suele ser suficiente, ya que tiene una alta capacidad de rebrotar de raíz, lo que exige inversiones en tratamientos químicos o mecánicos especializados.</li>
+                      </ul>
+                  </div>
+
+                  <!-- Vía de introducción -->
+                  <div class="detalle-card">
+                      <div class="detalle-card-header">
+                          <i class="fas fa-info-circle"></i>
+                          <h2>Vía de introducción</h2>
+                      </div>
+                      <p> Introducción intencional como árbol ornamental.</p>
+                  </div>
+
+                  <div class="detalle-card mapa-card" style="grid-column: 1 / -1;">
+                      <div class="detalle-card-header">
+                          <i class="fas fa-map-marked-alt"></i>
+                          <h2>Distribución en Panamá</h2>
+                      </div>
+                      <p>Click en los puntos para su información</p>
+                      <br>
+                      <div class="leaflet-map-wrapper">
+                          <div id="mapa-tulipan" style="height: 380px; width: 100%;"></div>
+                      </div>
+                      <div class="map-info-bar">
+                          <div>📍 <span>4</span> Se encuentra establecido en todo el pais</div>
+                      </div>
+                      <div class="map-legend-items">
+                          <div class="map-legend-item"><div class="map-legend-dot" style="background:#ff4444;"></div> Presencia severa</div>
+                          <div class="map-legend-item"><div class="map-legend-dot" style="background:#ffaa00;"></div> Expansión activa</div>
+                          <div class="map-legend-item"><div class="map-legend-dot" style="background:#23C280; opacity:0.5;"></div> Zona de monitoreo
+                  </div>
+              </div>
+          </div>
+      </div>
+
+    </main>
+
+
+   
+
+
+  <footer class="footer">
+    <div class="footer-container">
+        <div class="footer-grid">
+            <!-- col 1: logo + descripción + social -->
+            <div class="footer-col-span-2">
+                <div class="footer-logo">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/DENR-Biodiversity_Management_Bureau.svg/1920px-DENR-Biodiversity_Management_Bureau.svg.png" alt="Logo" class="nav-logo">
+                    <span class="footer-logo-text"><span class="green">Bio</span><span class="white">Invasive</span></span>
+                </div>
+                <p class="footer-description">Informando a los panameños sobre especies invasoras. Datos verificados, alertas tempranas y guías de acción.</p>
+                <div class="footer-social">
+                    <a href="https://www.instagram.com/" class="footer-social-link"><i class="fab fa-instagram"></i></a>
+                    <a href="https://www.youtube.com/" class="footer-social-link"><i class="fab fa-youtube"></i></a>
+                    <a href="https://x.com/" class="footer-social-link"><i class="fab fa-x-twitter"></i></a>
+                    <a href="https://www.facebook.com/" class="footer-social-link"><i class="fab fa-facebook-f"></i></a>
+                </div>
+            </div>
+
+            <!-- Compañía -->
+            <div>
+                <h5 class="footer-heading">Compañía</h5>
+                <ul class="footer-list">
+                    <li><a href="#">Inicio</a></li>
+                    <li><a href="#">Componentes</a></li>
+                    <li><a href="#">Casos de Uso</a></li>
+                    <li><a href="#">Precios</a></li>
+                </ul>
+            </div>
+
+            <!-- Recursos -->
+            <div>
+                <h5 class="footer-heading">Recursos</h5>
+                <ul class="footer-list">
+                    <li><a href="#" id="abrir-modal-fuentes">Fuentes</a></li>
+                    <li><a href="#">Blog</a></li>
+                    <li><a href="#">Documentación</a></li>
+                    <li><a href="#">Tutoriales</a></li>
+                    <li><a href="#">API Acceso</a></li>
+                </ul>
+            </div>
+
+            <!-- Soporte & contacto rápido -->
+            <div>
+                <h5 class="footer-heading">Soporte</h5>
+                <ul class="footer-list">
+                    <li><a href="#">Centro de Ayuda</a></li>
+                    <li><a href="#">Política de Privacidad</a></li>
+                    <li><a href="#">Términos de Servicio</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Divider + copyright + contacto + ubicación -->
+        <div class="footer-divider"></div>
+        <div class="footer-bottom">
+            <p>© 2026 BioInvasive. Todos los derechos reservados.</p>
+            <p class="footer-contact">(507) 456-2817 · bioinvasive@gmail.com</p>
+            <img src="https://cdn-icons-png.flaticon.com/128/330/330579.png" alt="Logo" class="footer-img">
+            <p>Panamá · Información ecológica</p>
+        </div>
+    </div>
+  </footer>
+
+<!-- Modal de fuentes (al final del body, antes del script) -->
+<div id="modal-fuentes" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 800px;">
+        <span class="close" id="cerrar-modal-fuentes">&times;</span>
+        <h2 style="color: #23C280; text-align: center; margin-bottom: 20px;">📚 Fuentes utilizadas</h2>
+        <div id="fuentes-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; max-height: 60vh; overflow-y: auto; padding: 5px;"></div>
+    </div>
+</div>
+
+<script>
+    // Array de fuentes (título, url)
+    const fuentes = [
+        { titulo: "Smithsonian Tropical Research Institute (STRI) - Invasiones biológicas", url: "https://stri.si.edu/es/disciplinas/invasiones-biologicas" },
+        { titulo: "Concepto.de - Especie invasora", url: "https://concepto.de/especie-invasora/" },
+        { titulo: "Ecología Verde - Especies invasoras: qué son, ejemplos y consecuencias", url: "https://ecologiaverde.elperiodico.com/especies-invasoras-que-son-ejemplos-y-consecuencias-3251.html" },
+        { titulo: "Tecnología ambiental - Diferencia entre especies nativas y endémicas", url: "https://tecnologiaambiental.mx/cual-es-la-diferencia-entre-especies-nativas-y-endemicas/" },
+        { titulo: "National Wildlife Federation - Invasive Species", url: "https://www.nwf.org/Educational-Resources/Wildlife-Guide/Threats-to-Wildlife/Invasive-Species" },
+        { titulo: "Ecoticias - Canal de Panamá: invasiones interoceánicas de especies", url: "https://www.ecoticias.com/eco-america/canal-panama-invasiones-interoceanicas-especies" },
+        { titulo: "EcoTV Panamá - Rescate de animales víctimas del tráfico ilegal", url: "https://www.ecotvpanama.com/ambiente/panama-rescata-mas-750-animales-victimas-del-trafico-ilegal-lo-que-va-del-ano-n6048467" },
+        { titulo: "Gaceta Oficial de Panamá", url: "https://www.gacetaoficial.gob.pa/" },
+        { titulo: "Ministerio de Ambiente (MiAMBIENTE)", url: "https://miambiente.gob.pa/" },
+        { titulo: "Ministerio de Desarrollo Agropecuario (MIDA)", url: "https://mida.gob.pa/" },
+        { titulo: "Convenio sobre la Diversidad Biológica (CDB)", url: "https://www.cbd.int/" },
+        { titulo: "Ley 24 de 1995 (Vida Silvestre)", url: "https://www.gacetaoficial.gob.pa/" },
+        { titulo: "Ley 47 de 1996 (Sanidad Vegetal)", url: "https://www.gacetaoficial.gob.pa/" },
+        { titulo: "Ley 23 de 1997 (Salud Animal)", url: "https://www.gacetaoficial.gob.pa/" },
+        { titulo: "Ley 287 de 2022 (Derechos de la Naturaleza)", url: "https://www.gacetaoficial.gob.pa/" },
+        { titulo: "Video: Especies Invasoras (YouTube)", url: "https://www.youtube.com/embed/KuTgY-UPZTI" },
+        { titulo: "Video: Prevención (YouTube)", url: "https://www.youtube.com/embed/GaFV-T2Mv5U" }
+    ];
+
+    // Función para extraer dominio de una URL
+    function getDomainFromUrl(url) {
+        try {
+            const urlObj = new URL(url);
+            return urlObj.hostname.replace('www.', '');
+        } catch (e) {
+            return null;
+        }
+    }
+
+    // Función para obtener URL del favicon (servicio de Google)
+    function getFaviconUrl(url) {
+        const domain = getDomainFromUrl(url);
+        if (domain) {
+            return `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+        }
+        return null;
+    }
+
+    // Referencias a elementos del modal
+    const modalFuentes = document.getElementById('modal-fuentes');
+    const btnAbrirFuentes = document.getElementById('abrir-modal-fuentes');
+    const btnCerrarFuentes = document.getElementById('cerrar-modal-fuentes');
+    const gridFuentes = document.getElementById('fuentes-grid');
+
+    function abrirModalFuentes(e) {
+        e.preventDefault();
+        // Llenar grid si está vacío
+        if (gridFuentes.children.length === 0) {
+            fuentes.forEach(f => {
+                const card = document.createElement('div');
+                card.className = 'enterprise-card';
+                card.style.cursor = 'pointer';
+                card.style.padding = '15px';
+                card.style.display = 'flex';
+                card.style.flexDirection = 'column';
+                card.style.alignItems = 'center';
+                card.style.justifyContent = 'center';
+                card.style.transition = 'transform 0.2s';
+                card.onclick = () => window.open(f.url, '_blank');
+
+                const faviconUrl = getFaviconUrl(f.url);
+                let iconHtml;
+                if (faviconUrl) {
+                    iconHtml = `<img src="${faviconUrl}" alt="favicon" style="width: 32px; height: 32px; margin-bottom: 10px; object-fit: contain;">`;
+                } else {
+                    iconHtml = `<div style="font-size: 2.5rem; margin-bottom: 10px; line-height: 1;">📄</div>`;
+                }
+
+                card.innerHTML = `
+                    ${iconHtml}
+                    <h4 style="color: #23C280; margin: 0; font-size: 1rem; text-align: center;">${f.titulo}</h4>
+                `;
+                gridFuentes.appendChild(card);
+            });
+        }
+        modalFuentes.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function cerrarModalFuentes() {
+        modalFuentes.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+
+    btnAbrirFuentes?.addEventListener('click', abrirModalFuentes);
+    btnCerrarFuentes?.addEventListener('click', cerrarModalFuentes);
+
+    window.addEventListener('click', (e) => {
+        if (e.target === modalFuentes) cerrarModalFuentes();
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modalFuentes.style.display === 'flex') cerrarModalFuentes();
+    });
+</script>
+
+  <script src="script.js"></script>
+
+  <!-- ===== LEAFLET MAPS SCRIPTS (must be after script.js) ===== -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <script>
+    (function() {
+      const DARK_TILES = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+      const TILE_ATTR = '&copy; <a href="https://carto.com/">CARTO</a>';
+
+      // Pulsing animation
+      const s = document.createElement('style');
+      s.textContent = '@keyframes pulse-marker{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.3);opacity:.8;}}';
+      document.head.appendChild(s);
+
+      function crearIcono(color) {
+        return L.divIcon({
+          className: '',
+          html: '<div style="width:16px;height:16px;border-radius:50%;background:' + color + ';border:2.5px solid rgba(255,255,255,0.85);box-shadow:0 0 10px ' + color + ',0 0 3px rgba(0,0,0,0.6);animation:pulse-marker 2s infinite;"></div>',
+          iconSize: [16, 16],
+          iconAnchor: [8, 8],
+          popupAnchor: [0, -12]
+        });
+      }
+
+      function addMarkers(map, ubicaciones) {
+        ubicaciones.forEach(function(u) {
+          L.marker([u.lat, u.lng], { icon: crearIcono(u.color) })
+            .addTo(map)
+            .bindPopup('<div class="popup-title">' + u.nombre + '</div><div class="popup-body">' + u.info + '</div><span class="popup-tag">' + u.tipo + '</span>');
+        });
+      }
+
+      /* Mapa del Pez León */
+      window.initMapaPezLeon = function() {
+        if (window._mapPezLeon) { window._mapPezLeon.invalidateSize(); return; }
+        var map = L.map('mapa-pezleon', { center: [9.2, -80.5], zoom: 7, scrollWheelZoom: false });
+        L.tileLayer(DARK_TILES, { attribution: TILE_ATTR, maxZoom: 18 }).addTo(map);
+        L.polygon([[9.7,-83.2],[9.6,-77.5],[8.4,-77.3],[8.5,-83.3]], {
+          color:'#23C280', fillColor:'#23C280', fillOpacity:0.07, weight:1.5, dashArray:'6,6'
+        }).addTo(map).bindPopup('<div class="popup-title">Costa Caribe Panameña</div><div class="popup-body">Zona de dispersión activa.</div><span class="popup-tag">Zona de riesgo</span>');
+        addMarkers(map, [
+          { lat:9.34, lng:-82.25, nombre:'Bocas del Toro', info:'Primera detección en Panamá (2009). Mayor concentración conocida.', color:'#ff4444', tipo:'Presencia confirmada' },
+          { lat:9.55, lng:-79.10, nombre:'Guna Yala', info:'Archipiélago de San Blas afectado. Impacto severo en arrecifes coralinos.', color:'#ff4444', tipo:'Presencia confirmada' },
+          { lat:9.36, lng:-79.90, nombre:'Colón', info:'Zona de entrada del Canal. Avistamientos frecuentes en costas atlánticas.', color:'#ff4444', tipo:'Presencia confirmada' },
+          { lat:9.55, lng:-82.00, nombre:'Isla Bastimentos', info:'Reserva marina con presencia registrada. Monitoreo activo por ARAP.', color:'#ffaa00', tipo:'Avistamientos ocasionales' },
+          { lat:9.25, lng:-79.65, nombre:'Portobelo', info:'Parque Nacional marino con presencia detectada desde 2012.', color:'#ffaa00', tipo:'Avistamientos ocasionales' },
+        ]);
+        window._mapPezLeon = map;
+        setTimeout(function(){ map.invalidateSize(); }, 200);
+      };
+
+      /* Mapa Pez Sargento */
+      window.initMapaPezSargento = function() {
+        if (window._mapPezSargento) { window._mapPezSargento.invalidateSize(); return; }
+        var map = L.map('mapa-pezsargento', { center: [8.5, -80.5], zoom: 7, scrollWheelZoom: false });
+        L.tileLayer(DARK_TILES, { attribution: TILE_ATTR, maxZoom: 18 }).addTo(map);
+        L.polygon([[9.5,-83.0],[9.5,-77.4],[7.2,-77.4],[7.2,-83.0]], {
+          color:'#ffaa00', fillColor:'#ffaa00', fillOpacity:0.06, weight:1.5, dashArray:'6,6'
+        }).addTo(map).bindPopup('<div class="popup-title">Zona de riesgo interior</div><div class="popup-body">Tierras agrícolas y humedales vulnerables.</div><span class="popup-tag">Zona de riesgo</span>');
+        addMarkers(map, [
+          { lat: 9.12, lng: -79.80, nombre: 'Lago Gatún', info: 'Especie dominante desplazando fauna nativa.', color: '#ff4444', tipo: 'Presencia Confirmada' },
+          { lat: 9.22, lng: -79.55, nombre: 'Lago Alajuela', info: 'Población establecida con fines de pesca.', color: '#ff4444', tipo: 'Presencia Confirmada' },
+        ]);
+        window._mapPezSargento = map;
+        setTimeout(function(){ map.invalidateSize(); }, 200);
+      };
+
+      /* Mapa de Tilapia */
+      window.initMapaTilapia = function() {
+        if (window._mapTilapia) { window._mapTilapia.invalidateSize(); return; }
+        var map = L.map('mapa-tilapia', { center: [8.5, -80.3], zoom: 7, scrollWheelZoom: false });
+        L.tileLayer(DARK_TILES, { attribution: TILE_ATTR, maxZoom: 18 }).addTo(map);
+        L.polygon([[8.9,-83.0],[8.9,-77.4],[7.2,-77.4],[7.2,-83.0]], {
+          color:'#ffaa00', fillColor:'#ffaa00', fillOpacity:0.06, weight:1.5, dashArray:'6,6'
+        }).addTo(map).bindPopup('<div class="popup-title">Zona de expansión activa</div><div class="popup-body">Ríos y sistemas de agua dulce con colonias escapadas de acuicultura.</div><span class="popup-tag">Zona de riesgo</span>');
+        addMarkers(map, [
+          { lat:9.12, lng:-79.80, nombre:'Lago Gatún', info:'Población de tilapia bien establecida. Compite ferozmente con el cíchlido local y peces nativos del Canal.', color:'#ff4444', tipo:'Presencia confirmada' },
+          { lat:8.43, lng:-82.43, nombre:'Chiriquí (David)', info:'Criaderos de tilapia con escapes reportados hacia ríos Chiriquí y Fonseca. Impacto en pesca artesanal.', color:'#ff4444', tipo:'Presencia confirmada' },
+          { lat:8.00, lng:-81.10, nombre:'Veraguas (Santiago)', info:'Acuicultura intensiva de tilapia con registros de escape hacia el Río Santa María. Competencia con peces nativos.', color:'#ff4444', tipo:'Presencia confirmada' },
+          { lat:8.52, lng:-80.40, nombre:'Coclé (Penonomé)', info:'Expansión en ríos de la vertiente Pacífica. Desplazamiento de corvinas y sábalos de agua dulce documentado.', color:'#ff4444', tipo:'Presencia confirmada' },
+          { lat:8.99, lng:-79.51, nombre:'Ciudad de Panamá (Río Matasnillo)', info:'Presencia en ríos urbanos degradados. Tolera aguas con bajo oxígeno donde las especies nativas no sobreviven.', color:'#ffaa00', tipo:'Avistamientos frecuentes' },
+          { lat:8.20, lng:-80.60, nombre:'Herrera (Chitré)', info:'Sistemas de riego con tilapia escapada. Monitoreada por MIDA como especie de riesgo para acuíferos costeros.', color:'#ffaa00', tipo:'Avistamientos frecuentes' },
+          { lat:9.34, lng:-82.30, nombre:'Bocas del Toro', info:'Riesgo de invasión en humedales del Caribe panameño. Presencia esporádica en ríos de acceso al mar.', color:'#23C280', tipo:'Zona de alerta' },
+        ]);
+        window._mapTilapia = map;
+        setTimeout(function(){ map.invalidateSize(); }, 200);
+      };
+
+      /* Mapa de Caracol Gigante Africano */
+      window.initMapaCaracolAfricano = function() {
+        if (window._mapCaracolAfricano) { window._mapCaracolAfricano.invalidateSize(); return; }
+        var map = L.map('mapa-caracolafricano', { center: [8.5, -80.5], zoom: 7, scrollWheelZoom: false });
+        L.tileLayer(DARK_TILES, { attribution: TILE_ATTR, maxZoom: 18 }).addTo(map);
+        // Highlight border regions at risk
+        L.polygon([[8.0,-77.2],[7.2,-77.2],[7.2,-77.9],[8.0,-77.9]], {
+          color:'#ff4444', fillColor:'#ff4444', fillOpacity:0.10, weight:1.5, dashArray:'5,5'
+        }).addTo(map).bindPopup('<div class="popup-title">Frontera con Colombia (Darién)</div><div class="popup-body">Principal vector de ingreso. Presencia confirmada en Chocó colombiano, a pocos km de la frontera panameña.</div><span class="popup-tag">Frontera de alto riesgo</span>');
+        L.polygon([[8.9,-82.6],[7.9,-82.6],[7.9,-83.2],[8.9,-83.2]], {
+          color:'#ffaa00', fillColor:'#ffaa00', fillOpacity:0.10, weight:1.5, dashArray:'5,5'
+        }).addTo(map).bindPopup('<div class="popup-title">Frontera con Costa Rica (Chiriquí)</div><div class="popup-body">Riesgo moderado. Especie detectada en zonas fronterizas de Guanacaste y Puntarenas, Costa Rica.</div><span class="popup-tag">Frontera de riesgo moderado</span>');
+        addMarkers(map, [
+          { lat:7.50, lng:-77.70, nombre:'Darién (Zona Fronteriza)', info:'Punto de máximo riesgo. Especie confirmada en Colombia a pocos km. Inspecciones fitosanitarias intensificadas por ANAM.', color:'#ff4444', tipo:'Zona de alerta máxima' },
+          { lat:7.90, lng:-77.40, nombre:'La Palma (Darién)', info:'Alertas emitidas en 2023 por tránsito irregular de viajeros con cargamentos agrícolas no inspeccionados.', color:'#ff4444', tipo:'Zona de alerta máxima' },
+          { lat:8.43, lng:-82.85, nombre:'Paso Canoas (Chiriquí)', info:'Principal puerto de entrada terrestre con Costa Rica. Riesgo por tráfico agrícola diario y vehículos particulares.', color:'#ffaa00', tipo:'Punto de control fitosanitario' },
+          { lat:8.52, lng:-80.40, nombre:'Coclé (Penonomé)', info:'Área agrícola bajo vigilancia preventiva por su densidad de cultivos susceptibles (cacao, cítricos, plátano).', color:'#ffaa00', tipo:'Zona de vigilancia preventiva' },
+          { lat:8.99, lng:-79.51, nombre:'Ciudad de Panamá (Panamá Centro)', info:'Riesgo por comercio informal y mercados de plantas ornamentales. Ningún caso confirmado hasta la fecha.', color:'#23C280', tipo:'Alerta preventiva urbana' },
+          { lat:9.34, lng:-82.30, nombre:'Bocas del Toro', info:'Puerto marítimo con tráfico regional. Protocolo de inspección de cargamentos en vigor desde 2022.', color:'#23C280', tipo:'Puerto bajo monitoreo' },
+        ]);
+        window._mapCaracolAfricano = map;
+        setTimeout(function(){ map.invalidateSize(); }, 200);
+      };
+
+      /* Mapa de Hormiga Loca */
+      window.initMapaHormigaLoca = function() {
+        if (window._mapHormigaLoca) { window._mapHormigaLoca.invalidateSize(); return; }
+        var map = L.map('mapa-hormigaloca', { center: [8.9, -79.7], zoom: 8, scrollWheelZoom: false });
+        L.tileLayer(DARK_TILES, { attribution: TILE_ATTR, maxZoom: 18 }).addTo(map);
+        // Urban Panama City area highlighted as main hotspot
+        L.circle([8.99, -79.51], { radius:18000, color:'#ff4444', fillColor:'#ff4444', fillOpacity:0.10, weight:1.5, dashArray:'5,5' })
+          .addTo(map).bindPopup('<div class="popup-title">Gran Ciudad de Panamá</div><div class="popup-body">Principal núcleo de expansión urbana. Colonias detectadas en múltiples distritos desde 2019.</div><span class="popup-tag">Foco de expansión</span>');
+        addMarkers(map, [
+          { lat:9.00, lng:-79.48, nombre:'Ciudad de Panamá (San Miguelito)', info:'Primera detección documentada en Panamá (2019). Colonias masivas en áreas residenciales. Daño eléctrico en equipos registrado.', color:'#ff4444', tipo:'Presencia confirmada' },
+          { lat:8.99, lng:-79.62, nombre:'Arraiján (Panamá Oeste)', info:'Expansión rápida en urbanizaciones nuevas. Destrucción de colonias de hormigas nativas como Atta y Solenopsis.', color:'#ff4444', tipo:'Presencia confirmada' },
+          { lat:9.07, lng:-79.68, nombre:'Colón (Zona del Canal)', info:'Detecciones en áreas portuarias. Riesgo de distribución vía cargamento marítimo a otras regiones.', color:'#ff4444', tipo:'Presencia confirmada' },
+          { lat:9.15, lng:-79.85, nombre:'Gamboa (Cuenca del Canal)', info:'Avistamientos en bordes de selva del Parque Nacional Soberanía. Alta amenaza para fauna silvestre del suelo.', color:'#ffaa00', tipo:'Avistamientos documentados' },
+          { lat:8.75, lng:-79.90, nombre:'La Chorrera', info:'Expansión desde Ciudad de Panamá hacia el interior. Colonias en jardines y fincas pericivanas.', color:'#ffaa00', tipo:'Avistamientos documentados' },
+          { lat:8.52, lng:-80.40, nombre:'Coclé (Penonomé)', info:'Zona de alerta preventiva. Vigilancia por ANAM por riesgo de llegada desde la capital.', color:'#23C280', tipo:'Zona de alerta preventiva' },
+        ]);
+        window._mapHormigaLoca = map;
+        setTimeout(function(){ map.invalidateSize(); }, 200);
+      };
+
+      /* Mapa de Gecko Casero Común */
+      window.initMapaGecko = function() {
+        if (window._mapGecko) { window._mapGecko.invalidateSize(); return; }
+        var map = L.map('mapa-gecko', { center: [8.7, -80.2], zoom: 7, scrollWheelZoom: false });
+        L.tileLayer(DARK_TILES, { attribution: TILE_ATTR, maxZoom: 18 }).addTo(map);
+        // Wide presence zone across Panama
+        L.polygon([[9.7,-83.2],[9.6,-77.5],[7.2,-77.3],[7.2,-83.3]], {
+          color:'#ffaa00', fillColor:'#ffaa00', fillOpacity:0.05, weight:1, dashArray:'6,6'
+        }).addTo(map).bindPopup('<div class="popup-title">Distribución amplia en Panamá</div><div class="popup-body">El gecko casero se ha establecido en prácticamente todos los centros urbanos y periurbanos del país.</div><span class="popup-tag">Colonización generalizada</span>');
+        addMarkers(map, [
+          { lat:8.99, lng:-79.51, nombre:'Ciudad de Panamá', info:'Especie dominante en edificios, casas y comercios. Desplaza al gecko nativo Hemidactylus frenatus y compite con la salamanquesa local en áreas urbanas.', color:'#ff4444', tipo:'Colonización total' },
+          { lat:9.36, lng:-79.90, nombre:'Colón', info:'Fuerte presencia en el casco histórico y zonas portuarias. Llegó posiblemente vía cargamentos marítimos. Desplaza aves insectívoras nocturnas.', color:'#ff4444', tipo:'Colonización total' },
+          { lat:8.43, lng:-82.43, nombre:'David (Chiriquí)', info:'Segunda ciudad de Panamá con infestación generalizada. Compite con la salamanquesa endémica del Pacífico chiriquireño.', color:'#ff4444', tipo:'Colonización total' },
+          { lat:8.00, lng:-81.10, nombre:'Santiago (Veraguas)', info:'Presencia en casas y edificios desde mediados de los 2000. Interacción con geckos nativos del Pacífico documentada.', color:'#ff4444', tipo:'Presencia confirmada' },
+          { lat:9.34, lng:-82.30, nombre:'Bocas del Toro', info:'Colonias en hoteles y viviendas del archipiélago. Impacto en poblaciones de insectos polinizadores nocturnos.', color:'#ffaa00', tipo:'Presencia confirmada' },
+          { lat:8.52, lng:-80.40, nombre:'Penonomé (Coclé)', info:'Avance hacia zonas rurales a lo largo de la carretera Panamericana. Expansión activa detectada.', color:'#ffaa00', tipo:'Expansión activa' },
+          { lat:7.50, lng:-77.90, nombre:'La Palma (Darién)', info:'Frontera de expansión hacia selva húmeda. Riesgo de desplazamiento de geckos nativos del bosque tropical.', color:'#23C280', tipo:'Frente de invasión' },
+        ]);
+        window._mapGecko = map;
+        setTimeout(function(){ map.invalidateSize(); }, 200);
+      };
+
+      /* Mapa de Rana Coquí Antillana */
+      window.initMapaCoqui = function() {
+        if (window._mapCoqui) { window._mapCoqui.invalidateSize(); return; }
+        var map = L.map('mapa-coqui', { center: [8.9, -79.7], zoom: 8, scrollWheelZoom: false });
+        L.tileLayer(DARK_TILES, { attribution: TILE_ATTR, maxZoom: 18 }).addTo(map);
+        // Caribbean coast zone - primary habitat
+        L.circle([9.36, -79.90], { radius:30000, color:'#23C280', fillColor:'#23C280', fillOpacity:0.08, weight:1.5, dashArray:'5,5' })
+          .addTo(map).bindPopup('<div class="popup-title">Zona Atlántica / Caribe</div><div class="popup-body">Principal corredor de expansión. Clima húmedo ideal para la especie.</div><span class="popup-tag">Zona de expansión</span>');
+        addMarkers(map, [
+          { lat:8.99, lng:-79.51, nombre:'Ciudad de Panamá (Ancón / Miraflores)', info:'Colonias detectadas en jardines del Parque Natural Metropolitano y zonas residenciales del Pacífico. Canto nocturno intenso que afecta calidad de vida.', color:'#ff4444', tipo:'Presencia confirmada' },
+          { lat:9.05, lng:-79.68, nombre:'Gamboa (Zona del Canal)', info:'Introducida probablemente vía plantas ornamentales. Colonias en bordes de bosque. Competencia con ranas nativas como Craugastor fitzingeri.', color:'#ff4444', tipo:'Presencia confirmada' },
+          { lat:9.36, lng:-79.90, nombre:'Colón (Área Revertida)', info:'Expansión documentada en zonas reforestadas. Alta densidad por disponibilidad de refugios en construcciones abandonadas.', color:'#ff4444', tipo:'Presencia confirmada' },
+          { lat:9.34, lng:-82.30, nombre:'Bocas del Toro', info:'Presencia registrada en isla Colón y alrededores. Afecta anfibios locales vulnerables por solapamiento de nicho acústico.', color:'#ffaa00', tipo:'Expansión reciente' },
+          { lat:9.22, lng:-79.57, nombre:'Lago Alajuela (Cuenca del Chagres)', info:'Avistamientos en bordes del embalse. Riesgo de establecimiento en humedales de la cuenca hidrográfica del Canal.', color:'#ffaa00', tipo:'Avistamientos documentados' },
+          { lat:8.75, lng:-79.90, nombre:'La Chorrera / Capira', info:'Avance hacia el interior por la carretera Panamericana. Colonias en jardines de urbanizaciones nuevas.', color:'#23C280', tipo:'Frente de expansión' },
+        ]);
+        window._mapCoqui = map;
+        setTimeout(function(){ map.invalidateSize(); }, 200);
+      };
+
+      /* Mapa de Paja Canalera */
+      window.initMapaPajaC = function() {
+        if (window._mapPajaC) { window._mapPajaC.invalidateSize(); return; }
+        var map = L.map('mapa-pajac', { center: [8.9, -79.8], zoom: 8, scrollWheelZoom: false });
+        L.tileLayer(DARK_TILES, { attribution: TILE_ATTR, maxZoom: 18 }).addTo(map);
+        // Canal watershed zone - primary area
+        L.polygon([[9.4,-79.5],[9.4,-80.2],[8.6,-80.2],[8.6,-79.5]], {
+          color:'#ffaa00', fillColor:'#ffaa00', fillOpacity:0.08, weight:1.5, dashArray:'5,5'
+        }).addTo(map).bindPopup('<div class="popup-title">Cuenca Hidrográfica del Canal</div><div class="popup-body">Zona de mayor concentración histórica. La gramínea fue introducida para reforestar áreas degradadas del Canal en los años 1960-70, con consecuencias no previstas.</div><span class="popup-tag">Zona de origen</span>');
+        addMarkers(map, [
+          { lat:9.07, lng:-79.68, nombre:'Lago Gatún (Orillas)', info:'Origen histórico de la invasión. Introducida para controlar erosión de riberas del Canal. Hoy cubre miles de hectáreas de antigua selva secundaria.', color:'#ff4444', tipo:'Zona de origen' },
+          { lat:9.15, lng:-79.85, nombre:'Gamboa (Parque Soberanía)', info:'Avance hacia el Parque Nacional Soberanía. Los incendios que genera impiden la regeneración del bosque tropical en los bordes del parque.', color:'#ff4444', tipo:'Presencia confirmada' },
+          { lat:9.36, lng:-79.90, nombre:'Colón (Cerro Bruja / Escobas)', info:'Expansión masiva en las colinas del Atlántico. Genera incendios estacionales que debilitan la cobertura forestal.', color:'#ff4444', tipo:'Presencia confirmada' },
+          { lat:8.99, lng:-79.51, nombre:'Ciudad de Panamá (Panamá Este)', info:'Zonas deforestadas de Pacora y Chepo con alta densidad. Impide la recolonización de bosque nativo en tierras degradadas.', color:'#ff4444', tipo:'Presencia confirmada' },
+          { lat:8.75, lng:-80.20, nombre:'Penonomé / La Pintada', info:'Expansión activa hacia el interior. Las quemas agrícolas facilitan su dispersión hacia nuevos territorios.', color:'#ffaa00', tipo:'Expansión activa' },
+          { lat:8.20, lng:-80.60, nombre:'Herrera (Chitré / Los Santos)', info:'Frontera de invasión en la Península de Azuero. Amenaza a pastos nativos de la región más seca del país.', color:'#23C280', tipo:'Frente de invasión' },
+        ]);
+        window._mapPajaC = map;
+        setTimeout(function(){ map.invalidateSize(); }, 200);
+      };
+
+      /* Mapa de Jacinto de Agua */
+      window.initMapaJacinto = function() {
+        if (window._mapJacinto) { window._mapJacinto.invalidateSize(); return; }
+        var map = L.map('mapa-jacinto', { center: [9.0, -80.5], zoom: 7, scrollWheelZoom: false });
+        L.tileLayer(DARK_TILES, { attribution: TILE_ATTR, maxZoom: 18 }).addTo(map);
+        L.circle([9.22, -79.57], { radius:12000, color:'#4af', fillColor:'#4af', fillOpacity:0.12, weight:1.5, dashArray:'5,5' })
+          .addTo(map).bindPopup('<div class="popup-title">Lago Alajuela (Madden)</div><div class="popup-body">Principal reserva hídrica del Canal. Cobertura severa de jacinto.</div><span class="popup-tag">Cobertura severa</span>');
+        addMarkers(map, [
+          { lat:9.22, lng:-79.57, nombre:'Lago Alajuela', info:'Reservorio del Canal. Jacinto cubre hasta 40% de la superficie en épocas lluviosas.', color:'#ff4444', tipo:'Cobertura severa' },
+          { lat:9.11, lng:-79.67, nombre:'Canal de Panamá (Gatún)', info:'Afecta la navegación. La ACP realiza extracciones periódicas.', color:'#ff4444', tipo:'Cobertura severa' },
+          { lat:8.43, lng:-82.10, nombre:'Río Chiriquí Grande', info:'Proliferación en tramos lentos del río. Impacta pesca artesanal local.', color:'#ff4444', tipo:'Cobertura severa' },
+          { lat:9.34, lng:-82.30, nombre:'Bocas del Toro', info:'Ríos y canales con expansión reciente documentada.', color:'#ffaa00', tipo:'Cobertura moderada' },
+          { lat:8.80, lng:-79.53, nombre:'Río Chagres', info:'Cuenca alta con presencia esporádica. Riesgo de expansión hacia Gatún.', color:'#ffaa00', tipo:'Cobertura moderada' },
+          { lat:9.08, lng:-79.68, nombre:'Lago Gatún', info:'Lago artificial del Canal con monitoreo constante por ACP.', color:'#ffaa00', tipo:'Cobertura moderada' },
+        ]);
+        window._mapJacinto = map;
+        setTimeout(function(){ map.invalidateSize(); }, 200);
+      };
+
+      /* Mapa de Tulipán Africano */
+      window.initMapaTulipan = function() {
+        if (window._mapTulipan) { window._mapTulipan.invalidateSize(); return; }
+        var map = L.map('mapa-tulipan', { center: [8.6, -80.5], zoom: 7, scrollWheelZoom: false });
+        L.tileLayer(DARK_TILES, { attribution: TILE_ATTR, maxZoom: 18 }).addTo(map);
+        // Pacific and Atlantic corridor
+        L.polygon([[9.7,-83.2],[9.7,-77.5],[7.2,-77.3],[7.2,-83.3]], {
+          color:'#ff6600', fillColor:'#ff6600', fillOpacity:0.05, weight:1, dashArray:'6,6'
+        }).addTo(map).bindPopup('<div class="popup-title">Distribución nacional</div><div class="popup-body">El tulipán africano se ha establecido a lo largo de corredores de carreteras, bordes de ríos y zonas periurbanas de todo el país.</div><span class="popup-tag">Distribución amplia</span>');
+        addMarkers(map, [
+          { lat:9.34, lng:-82.30, nombre:'Bocas del Toro', info:'Alta densidad en bordes de ríos y canales. Desplaza árboles nativos ribereños como el corotú. Néctar tóxico registrado para colibríes endémicos del Caribe.', color:'#ff4444', tipo:'Presencia severa' },
+          { lat:8.43, lng:-82.43, nombre:'Chiriquí (David y Boquete)', info:'Presente en bordes de bosque nuboso y zonas de agricultura. Compite con flora nativa del Parque La Amistad. Las aves lo dispersan eficientemente.', color:'#ff4444', tipo:'Presencia severa' },
+          { lat:8.99, lng:-79.51, nombre:'Ciudad de Panamá (periurbana)', info:'Plantado como ornamental en parques y avenidas. Se dispersa hacia el Parque Natural Metropolitano y el Parque Omar Torrijos.', color:'#ff4444', tipo:'Presencia confirmada' },
+          { lat:8.75, lng:-79.90, nombre:'Panamá Oeste (La Chorrera / Capira)', info:'Expansión masiva en bordes de carretera. Forma parches densos que impiden la regeneración del bosque secundario.', color:'#ff4444', tipo:'Presencia confirmada' },
+          { lat:8.00, lng:-81.10, nombre:'Veraguas (Santiago)', info:'Colonias establecidas en bordes de ríos como el Santa María. Impide crecimiento de vegetación riparia nativa.', color:'#ffaa00', tipo:'Expansión activa' },
+          { lat:8.20, lng:-80.60, nombre:'Herrera (Azuero)', info:'Avance en la Península de Azuero. Amenaza vegetación de bosque seco tropical, uno de los ecosistemas más amenazados de Panamá.', color:'#ffaa00', tipo:'Expansión activa' },
+          { lat:9.22, lng:-79.57, nombre:'Cuenca del Chagres (Chagres NP)', info:'Presencia en bordes del Parque Nacional Chagres. Monitoreo activo por ACP y ANAM para proteger la cuenca del Canal.', color:'#23C280', tipo:'Zona de monitoreo' },
+        ]);
+        window._mapTulipan = map;
+        setTimeout(function(){ map.invalidateSize(); }, 200);
+      };
+
+      // Hook into mostrarPantalla AFTER script.js has defined it
+      var _orig = window.mostrarPantalla;
+      window.mostrarPantalla = function(pantallaId) {
+        _orig(pantallaId);
+        setTimeout(function() {
+          if (pantallaId === 'detalle-pezleon') window.initMapaPezLeon();
+          if (pantallaId === 'detalle-pezsargento') window.initMapaPezSargento();
+          if (pantallaId === 'detalle-tilapia') window.initMapaTilapia();
+          if (pantallaId === 'detalle-caracolafricano') window.initMapaCaracolAfricano();
+          if (pantallaId === 'detalle-hormigaloca') window.initMapaHormigaLoca();
+          if (pantallaId === 'detalle-gecko') window.initMapaGecko();
+          if (pantallaId === 'detalle-coqui') window.initMapaCoqui();
+          if (pantallaId === 'detalle-pajac') window.initMapaPajaC();
+          if (pantallaId === 'detalle-jacinto') window.initMapaJacinto();
+          if (pantallaId === 'detalle-tulipan') window.initMapaTulipan();
+        }, 150);
+      };
+    })();
+  </script>
+</body>
+</html>
